@@ -12,20 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+""" Helper functions """
 
-"""Entrypoint of the package"""
-
-from ghga_service_chassis_lib.api import run_server
-
-from .api.main import app  # noqa: F401 pylint: disable=unused-import
-from .config import CONFIG, Config
+import secrets
+import string
 
 
-def run(config: Config = CONFIG):
-    """Run the service"""
-    # Please adapt to package name
-    run_server(app="my_microservice.__main__:app", config=config)
+def make_access_token(num=16):
+    """Produce a string containing num random numbers and letters"""
+    chars = string.ascii_letters + string.digits
+    return "".join([secrets.choice(chars) for _ in range(num)])
 
 
-if __name__ == "__main__":
-    run()
+def make_sample_id(bits=40):
+    """Produce a random bits-bit integer"""
+    return secrets.randbits(bits)

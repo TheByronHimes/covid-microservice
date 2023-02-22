@@ -2,7 +2,7 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.177.0/containers/python-3-postgres
 // Update the VARIANT arg in docker-compose.yml to pick a Python version: 3, 3.8, 3.7, 3.6
 {
-	"name": "my-microservice",
+	"name": "covid-microservice",
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "app",
 	"workspaceFolder": "/workspace",
@@ -65,7 +65,10 @@
 		"EditorConfig.EditorConfig"
 	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [5000, 5432],
+	"forwardPorts": [
+		8080,
+		8088
+	],
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "dev_install",
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.

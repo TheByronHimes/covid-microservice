@@ -13,21 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Config Parameter Modeling and Parsing"""
+"""
+Module containing the main FastAPI router and (optionally) top-level API enpoints.
+Additional endpoints might be structured in dedicated modules
+(each of them having a sub-router).
+"""
 
-from ghga_service_chassis_lib.api import ApiConfigBase
-from ghga_service_chassis_lib.config import config_from_yaml
+from fastapi import FastAPI
+from ghga_service_chassis_lib.api import configure_app
 
-from .models import SupportedLanguages
+from ..config import CONFIG
+from .router import sample_router
 
-
-# Please adapt config prefix and remove unnecessary config bases:
-@config_from_yaml(prefix="my_microservice")
-class Config(ApiConfigBase):
-    """Config parameters and their defaults."""
-
-    service_name: str = "my_microservice"  # Please adapt
-    language: SupportedLanguages = "Croatian"
+app = FastAPI()
+configure_app(app, config=CONFIG)
+app.include_router(sample_router)
 
 
-CONFIG = Config()
+@app.get("/", summary="Greet the world")
+async def index():
+    """Greet the World"""
+    return "Hello World."
