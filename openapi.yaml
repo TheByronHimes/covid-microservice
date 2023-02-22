@@ -1,37 +1,5 @@
 components:
   schemas:
-    Greeting:
-      description: A container storing a greeting for a specfic person incl. metadata
-      properties:
-        created_at:
-          description: The date/time when the message was created
-          format: date-time
-          title: Created At
-          type: string
-        isinformal:
-          description: Is the expression used in informal contexts?
-          title: Isinformal
-          type: boolean
-        language:
-          description: The language.
-          enum:
-          - Greek
-          - Croatian
-          - French
-          - German
-          title: Language
-          type: string
-        message:
-          description: The message content.
-          title: Message
-          type: string
-      required:
-      - message
-      - created_at
-      - language
-      - isinformal
-      title: Greeting
-      type: object
     HTTPValidationError:
       properties:
         detail:
@@ -40,6 +8,66 @@ components:
           title: Detail
           type: array
       title: HTTPValidationError
+      type: object
+    PcrTest:
+      description: Simple DTO for the PCR tests
+      properties:
+        access_token:
+          default: ''
+          title: Access Token
+          type: string
+        collection_date:
+          title: Collection Date
+          type: string
+        patient_pseudonym:
+          title: Patient Pseudonym
+          type: string
+        sample_id:
+          default: ''
+          title: Sample Id
+          type: string
+        status:
+          default: ''
+          title: Status
+          type: string
+        submitter_email:
+          title: Submitter Email
+          type: string
+        test_date:
+          default: ''
+          title: Test Date
+          type: string
+        test_result:
+          default: ''
+          title: Test Result
+          type: string
+      required:
+      - patient_pseudonym
+      - submitter_email
+      - collection_date
+      title: PcrTest
+      type: object
+    UpdatePcrTest:
+      description: Update DTO for PcrTest
+      properties:
+        access_token:
+          title: Access Token
+          type: string
+        status:
+          default: ''
+          title: Status
+          type: string
+        test_date:
+          default: ''
+          title: Test Date
+          type: string
+        test_result:
+          default: ''
+          title: Test Result
+          type: string
+      required:
+      - access_token
+      title: UpdatePcrTest
       type: object
     ValidationError:
       properties:
@@ -78,31 +106,23 @@ paths:
               schema: {}
           description: Successful Response
       summary: Greet the world
-  /greet/{name}:
-    get:
-      description: Greet a person by name. You may choose a formal or an informal
-        greeting.The language for the greeting is configured in the backend.
-      operationId: greet_greet__name__get
-      parameters:
-      - in: path
-        name: name
+  /sample:
+    patch:
+      description: "Update a test sample with results.\nHandle PATCH req:\n    1.\
+        \ Find sample with matching access_token\n    2. Update sample\n    3. Return\
+        \ updated sample"
+      operationId: update_sample_sample_patch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePcrTest'
         required: true
-        schema:
-          title: Name
-          type: string
-      - in: query
-        name: isinformal
-        required: false
-        schema:
-          default: true
-          title: Isinformal
-          type: boolean
       responses:
-        '200':
+        '201':
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Greeting'
+              schema: {}
           description: Successful Response
         '422':
           content:
@@ -110,4 +130,52 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
           description: Validation Error
-      summary: Greet a person
+      summary: Update Sample
+    post:
+      description: "Upload a new sample.\nHandle POST req:\n    1. Insert new data\n\
+        \    2. Return sample_id and access_token"
+      operationId: post_sample_sample_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PcrTest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Post Sample
+  /sample/{access_token}:
+    get:
+      description: "Search for a test sample matching the access token.\nHandle GET\
+        \ req:\n    1. Return test sample information if found"
+      operationId: get_sample_sample__access_token__get
+      parameters:
+      - in: path
+        name: access_token
+        required: true
+        schema:
+          title: Access Token
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Get Sample

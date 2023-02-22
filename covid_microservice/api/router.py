@@ -57,7 +57,7 @@ def get_sample(access_token: str):
     """
     access_token = access_token.strip()
     sample = help_find_sample(access_token)
-    data_to_return = sample.to_dict(
+    data_to_return = sample.dictify(
         [
             "patient_pseudonym",
             "submitter_email",
@@ -81,8 +81,8 @@ def post_sample(data: PcrTest):
     data.access_token = make_access_token()
     data.sample_id = make_sample_id()
     record_id = mdao.insert_one(data)
-    sample = mdao.find_one({"_id": record_id})
-    data_to_return = sample.to_dict(["sample_id", "access_token"])
+    sample = mdao.find_by_key(record_id)
+    data_to_return = sample.dictify(["sample_id", "access_token"])
 
     return data_to_return
 
@@ -103,4 +103,4 @@ def update_sample(data: UpdatePcrTest):
 
     result = help_update_sample(data.access_token, sample)
 
-    return result.to_dict()
+    return result.dictify()

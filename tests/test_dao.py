@@ -15,7 +15,22 @@
 
 """Test dummy."""
 
+from covid_microservice.models import MongoDao, PcrTest
 
-def test_dummy():
-    """Just makes the CI pass."""
-    assert True
+
+def test_mongo():
+    """tests MongoDao functions"""
+    mdao = MongoDao(PcrTest)
+    assert mdao.delete_one({"access_token": 23423423}) is False
+
+
+def test_mongo_pcrtest():
+    """Make sure the MongoDao works with PcrTest usage"""
+    mdao = MongoDao(PcrTest)
+    pcr_test = PcrTest(
+        patient_pseudonym="test test test",
+        submitter_email="test@test.com",
+        collection_date="test date",
+    )
+    assert isinstance(mdao.insert_one(pcr_test), int) is True
+    assert mdao.find_one(pcr_test.dictify()) == pcr_test

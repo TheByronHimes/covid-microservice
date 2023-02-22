@@ -55,13 +55,10 @@ class Greeting(GreetingBase, MessageBase):
     pass  # pylint: disable=unnecessary-pass
 
 
-#
-
-
 class Dto(BaseModel):
     """Base Dto Class"""
 
-    def dictify(self, fields: Union[List[str], None]) -> Dict:
+    def dictify(self, fields: Union[List[str], None] = None) -> Dict:
         """Returns a dictionary version of the object with only specified fields"""
         if fields is None:
             fields = self.__fields__
@@ -110,8 +107,13 @@ class MongoDao:
         return document
 
     def _document_to_dto(self, document):
-        document.pop("_id")
+        if "_id" in document:
+            document.pop("_id")
         return self.dto_type(**document)
+
+    def find_by_key(self, key: int):
+        """Direct lookup by key"""
+        return self._document_to_dto(self.db[key])
 
     def find_one(self, filters: Mapping[str, Any]):
         """Find first item that matches criteria"""
