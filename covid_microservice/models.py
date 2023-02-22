@@ -16,9 +16,10 @@
 """Defines dataclasses for holding business-logic data"""
 
 from datetime import datetime
+from enum import Enum
 from typing import Any, Dict, List, Literal, Mapping, Type, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 from .api.ancillary import make_sample_id
 
@@ -55,6 +56,11 @@ class Greeting(GreetingBase, MessageBase):
     pass  # pylint: disable=unnecessary-pass
 
 
+## *********************************************************
+## *********************************************************
+## *********************************************************
+
+
 class Dto(BaseModel):
     """Base Dto Class"""
 
@@ -65,18 +71,37 @@ class Dto(BaseModel):
         return {k: getattr(self, k) for k in fields}
 
 
+class StatusEnum(str, Enum):
+    """Enumeration for PcrTest status values"""
+
+    UNSET = ""
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
+class TestResultEnum(str, Enum):
+    """Enumeration for PcrTest test_result values"""
+
+    UNSET = ""
+    POSITIVE = "positive"
+    NEGATIVE = "negative"
+
+
 class PcrTest(Dto):
     """Simple DTO for the PCR tests"""
 
-    #  DO: proper enumeration on status and test result fields
-    patient_pseudonym: str
-    submitter_email: str
-    collection_date: str
+    patient_pseudonym: str = Field(
+        ..., min_length=11, max_length=63, strip_whitespace=True
+    )
+    submitter_email: EmailStr
+    collection_date: str = Field(..., regex=r"^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$")
     sample_id: str = ""
-    access_token: str = ""
-    status: str = ""
-    test_result: str = ""
-    test_date: str = ""
+    access_token: str = Field(
+        default="", regex=r"^[a-zA-Z0-9]*$", strip_whitespace=True
+    )
+    status: StatusEnum = StatusEnum.UNSET
+    test_result: TestResultEnum = TestResultEnum.UNSET
+    test_date: str = Field(default="", regex=r"(^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$)?")
 
     class Config:
         """Config options for this class"""
@@ -87,12 +112,11 @@ class PcrTest(Dto):
 class UpdatePcrTest(Dto):
     """Update DTO for PcrTest"""
 
-    # DO: proper validation on the date fields
-    # DO: proper enumeration on status and test result fields
-    access_token: str
-    status: str = ""
-    test_result: str = ""
-    test_date: str = ""
+    access_token: str = Field(..., regex=r"^[a-zA-Z0-9]*$", strip_whitespace=True)
+    status: StatusEnum
+    test_result: TestResultEnum
+    # the regex is slightly different: The date is considered mandatory here
+    test_date: str = Field(..., regex=r"\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?")
 
 
 class MongoDao:

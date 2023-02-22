@@ -14,12 +14,18 @@ components:
       properties:
         access_token:
           default: ''
+          pattern: ^[a-zA-Z0-9]*$
+          strip_whitespace: true
           title: Access Token
           type: string
         collection_date:
+          pattern: ^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$
           title: Collection Date
           type: string
         patient_pseudonym:
+          maxLength: 63
+          minLength: 11
+          strip_whitespace: true
           title: Patient Pseudonym
           type: string
         sample_id:
@@ -27,46 +33,65 @@ components:
           title: Sample Id
           type: string
         status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
           default: ''
-          title: Status
-          type: string
         submitter_email:
+          format: email
           title: Submitter Email
           type: string
         test_date:
           default: ''
+          pattern: (^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$)?
           title: Test Date
           type: string
         test_result:
+          allOf:
+          - $ref: '#/components/schemas/TestResultEnum'
           default: ''
-          title: Test Result
-          type: string
       required:
       - patient_pseudonym
       - submitter_email
       - collection_date
       title: PcrTest
       type: object
+    StatusEnum:
+      description: Enumeration for PcrTest status values
+      enum:
+      - ''
+      - completed
+      - failed
+      title: StatusEnum
+      type: string
+    TestResultEnum:
+      description: Enumeration for PcrTest test_result values
+      enum:
+      - ''
+      - positive
+      - negative
+      title: TestResultEnum
+      type: string
     UpdatePcrTest:
       description: Update DTO for PcrTest
       properties:
         access_token:
+          pattern: ^[a-zA-Z0-9]*$
+          strip_whitespace: true
           title: Access Token
           type: string
         status:
-          default: ''
-          title: Status
-          type: string
+          $ref: '#/components/schemas/StatusEnum'
         test_date:
-          default: ''
+          pattern: \d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?
           title: Test Date
           type: string
         test_result:
-          default: ''
-          title: Test Result
-          type: string
+          $ref: '#/components/schemas/TestResultEnum'
       required:
       - access_token
+      - status
+      - test_result
+      - test_date
       title: UpdatePcrTest
       type: object
     ValidationError:

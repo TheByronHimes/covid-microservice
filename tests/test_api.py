@@ -23,7 +23,7 @@ def test_post_sample():
     pcr_test = PcrTest(
         patient_pseudonym="test test test",
         submitter_email="test@test.com",
-        collection_date="test date",
+        collection_date="2022-08-21T11:18",
     )
 
     obj = router.post_sample(pcr_test)

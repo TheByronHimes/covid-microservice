@@ -30,7 +30,7 @@ def test_mongo_pcrtest():
     pcr_test = PcrTest(
         patient_pseudonym="test test test",
         submitter_email="test@test.com",
-        collection_date="test date",
+        collection_date="2022-08-21T11:18",
     )
     assert isinstance(mdao.insert_one(pcr_test), int) is True
     assert mdao.find_one(pcr_test.dictify()) == pcr_test
