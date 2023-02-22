@@ -66,9 +66,6 @@ def test_with_invalid_email_format():
         access_token="43234567812345678",
     )
 
-    print("PcrTest accepted invalid email address")
-    assert True
-
 
 @pytest.mark.xfail
 def test_with_bad_status():
@@ -97,8 +94,6 @@ def test_with_too_long_email():
         collection_date="2022-08-21T11:18",
         access_token="63234567812345678",
     )
-    print("PcrTest accepted too-long email address")
-    assert True
 
 
 @pytest.mark.xfail
