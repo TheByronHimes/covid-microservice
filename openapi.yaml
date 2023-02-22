@@ -15,7 +15,6 @@ components:
         access_token:
           default: ''
           pattern: ^[a-zA-Z0-9]*$
-          strip_whitespace: true
           title: Access Token
           type: string
         collection_date:
@@ -25,7 +24,6 @@ components:
         patient_pseudonym:
           maxLength: 63
           minLength: 11
-          strip_whitespace: true
           title: Patient Pseudonym
           type: string
         sample_id:
@@ -76,7 +74,6 @@ components:
       properties:
         access_token:
           pattern: ^[a-zA-Z0-9]*$
-          strip_whitespace: true
           title: Access Token
           type: string
         status:

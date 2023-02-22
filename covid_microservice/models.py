@@ -90,15 +90,11 @@ class TestResultEnum(str, Enum):
 class PcrTest(Dto):
     """Simple DTO for the PCR tests"""
 
-    patient_pseudonym: str = Field(
-        ..., min_length=11, max_length=63, strip_whitespace=True
-    )
+    patient_pseudonym: str = Field(..., min_length=11, max_length=63)
     submitter_email: EmailStr
     collection_date: str = Field(..., regex=r"^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$")
     sample_id: str = ""
-    access_token: str = Field(
-        default="", regex=r"^[a-zA-Z0-9]*$", strip_whitespace=True
-    )
+    access_token: str = Field(default="", regex=r"^[a-zA-Z0-9]*$")
     status: StatusEnum = StatusEnum.UNSET
     test_result: TestResultEnum = TestResultEnum.UNSET
     test_date: str = Field(default="", regex=r"(^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$)?")
@@ -112,7 +108,7 @@ class PcrTest(Dto):
 class UpdatePcrTest(Dto):
     """Update DTO for PcrTest"""
 
-    access_token: str = Field(..., regex=r"^[a-zA-Z0-9]*$", strip_whitespace=True)
+    access_token: str = Field(..., regex=r"^[a-zA-Z0-9]*$")
     status: StatusEnum
     test_result: TestResultEnum
     # the regex is slightly different: The date is considered mandatory here
