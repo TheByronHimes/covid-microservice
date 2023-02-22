@@ -38,7 +38,6 @@
 		"python.testing.pytestPath": "/usr/local/py-utils/bin/pytest",
 		"python.testing.unittestEnabled": false,
 		"python.testing.pytestEnabled": true,
-		"editor.renderWhitespace": "all",
 		"editor.rulers": [
 			88
 		],
