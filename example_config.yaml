@@ -5,10 +5,10 @@ cors_allowed_headers: null
 cors_allowed_methods: null
 cors_allowed_origins: null
 docs_url: /docs
-host: 127.0.0.1
+host: 0.0.0.0
 language: Greek
 log_level: info
 openapi_url: /openapi.json
 port: 8080
-service_name: my_microservice
+service_name: covid_microservice
 workers: 1

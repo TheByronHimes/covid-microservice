@@ -9,14 +9,13 @@ components:
           type: array
       title: HTTPValidationError
       type: object
-    PcrTest:
-      description: Simple DTO for the PCR tests
+    NewSampleSubmission:
+      description: 'Pydantic model to perform validation on new submission data.
+
+        This is separate from the PcrTest to prevent someone from submitting
+
+        their own access token.'
       properties:
-        access_token:
-          default: ''
-          pattern: ^[a-zA-Z0-9]*$
-          title: Access Token
-          type: string
         collection_date:
           pattern: ^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$
           title: Collection Date
@@ -26,37 +25,20 @@ components:
           minLength: 11
           title: Patient Pseudonym
           type: string
-        sample_id:
-          default: ''
-          title: Sample Id
-          type: string
-        status:
-          allOf:
-          - $ref: '#/components/schemas/StatusEnum'
-          default: ''
         submitter_email:
           format: email
           title: Submitter Email
           type: string
-        test_date:
-          default: ''
-          pattern: (^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$)?
-          title: Test Date
-          type: string
-        test_result:
-          allOf:
-          - $ref: '#/components/schemas/TestResultEnum'
-          default: ''
       required:
       - patient_pseudonym
       - submitter_email
       - collection_date
-      title: PcrTest
+      title: NewSampleSubmission
       type: object
     StatusEnum:
       description: Enumeration for PcrTest status values
       enum:
-      - ''
+      - pending
       - completed
       - failed
       title: StatusEnum
@@ -141,10 +123,7 @@ paths:
               $ref: '#/components/schemas/UpdatePcrTest'
         required: true
       responses:
-        '201':
-          content:
-            application/json:
-              schema: {}
+        '204':
           description: Successful Response
         '422':
           content:
@@ -152,7 +131,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
           description: Validation Error
-      summary: Update Sample
+      summary: Update an existing sample's test results
     post:
       description: "Upload a new sample.\nHandle POST req:\n    1. Insert new data\n\
         \    2. Return sample_id and access_token"
@@ -161,7 +140,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PcrTest'
+              $ref: '#/components/schemas/NewSampleSubmission'
         required: true
       responses:
         '201':
@@ -175,7 +154,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
           description: Validation Error
-      summary: Post Sample
+      summary: Upload a new sample
   /sample/{access_token}:
     get:
       description: "Search for a test sample matching the access token.\nHandle GET\
@@ -200,4 +179,4 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
           description: Validation Error
-      summary: Get Sample
+      summary: Retrieve a existing sample

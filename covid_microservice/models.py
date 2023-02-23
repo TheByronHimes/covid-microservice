@@ -74,7 +74,7 @@ class Dto(BaseModel):
 class StatusEnum(str, Enum):
     """Enumeration for PcrTest status values"""
 
-    UNSET = ""
+    PENDING = "pending"
     COMPLETED = "completed"
     FAILED = "failed"
 
@@ -87,6 +87,17 @@ class TestResultEnum(str, Enum):
     NEGATIVE = "negative"
 
 
+class NewSampleSubmission(BaseModel):
+    """Pydantic model to perform validation on new submission data.
+    This is separate from the PcrTest to prevent someone from submitting
+    their own access token.
+    """
+
+    patient_pseudonym: str = Field(..., min_length=11, max_length=63)
+    submitter_email: EmailStr
+    collection_date: str = Field(..., regex=r"^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$")
+
+
 class PcrTest(Dto):
     """Simple DTO for the PCR tests"""
 
@@ -95,7 +106,7 @@ class PcrTest(Dto):
     collection_date: str = Field(..., regex=r"^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$")
     sample_id: str = ""
     access_token: str = Field(default="", regex=r"^[a-zA-Z0-9]*$")
-    status: StatusEnum = StatusEnum.UNSET
+    status: StatusEnum = StatusEnum.PENDING
     test_result: TestResultEnum = TestResultEnum.UNSET
     test_date: str = Field(default="", regex=r"(^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$)?")
 

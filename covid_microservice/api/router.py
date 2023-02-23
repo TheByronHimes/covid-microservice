@@ -25,7 +25,7 @@ Contents:
 
 from fastapi import APIRouter
 
-from ..models import MongoDao, PcrTest, UpdatePcrTest
+from ..models import MongoDao, NewSampleSubmission, PcrTest, UpdatePcrTest
 from .ancillary import make_access_token, make_sample_id
 
 # Create connection to DB
@@ -48,7 +48,9 @@ def help_update_sample(access_token: str, new_data: PcrTest) -> PcrTest:
 sample_router = APIRouter()
 
 
-@sample_router.get("/sample/{access_token}", status_code=200)
+@sample_router.get(
+    "/sample/{access_token}", status_code=200, summary="Retrieve a existing sample"
+)
 def get_sample(access_token: str):
     """
     Search for a test sample matching the access token.
@@ -70,24 +72,32 @@ def get_sample(access_token: str):
     return data_to_return
 
 
-@sample_router.post("/sample", status_code=201)
-def post_sample(data: PcrTest):
+@sample_router.post("/sample", status_code=201, summary="Upload a new sample")
+def post_sample(data: NewSampleSubmission):
     """
     Upload a new sample.
     Handle POST req:
         1. Insert new data
         2. Return sample_id and access_token
     """
-    data.access_token = make_access_token()
-    data.sample_id = make_sample_id()
-    record_id = mdao.insert_one(data)
+    pcrtest = PcrTest(
+        patient_pseudonym=data.patient_pseudonym,
+        submitter_email=data.submitter_email,
+        collection_date=data.collection_date,
+        sample_id=make_sample_id(),
+        access_token=make_access_token(),
+    )
+
+    record_id = mdao.insert_one(pcrtest)
     sample = mdao.find_by_key(record_id)
     data_to_return = sample.dictify(["sample_id", "access_token"])
-
+    #
     return data_to_return
 
 
-@sample_router.patch("/sample", status_code=201)
+@sample_router.patch(
+    "/sample", status_code=204, summary="Update an existing sample's test results"
+)
 def update_sample(data: UpdatePcrTest):
     """
     Update a test sample with results.
@@ -97,10 +107,10 @@ def update_sample(data: UpdatePcrTest):
         3. Return updated sample
     """
     sample = help_find_sample(data.access_token)
-    sample.status = data.status
-    sample.test_result = data.test_result
-    sample.test_date = data.test_date
-
-    result = help_update_sample(data.access_token, sample)
-
-    return result.dictify()
+    if isinstance(sample, PcrTest):
+        sample.status = data.status
+        sample.test_result = data.test_result
+        sample.test_date = data.test_date
+        help_update_sample(data.access_token, sample)
+        return 204
+    return 422
