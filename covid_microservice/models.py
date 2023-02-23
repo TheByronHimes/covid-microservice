@@ -17,11 +17,9 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Literal, Mapping, Type, Union
+from typing import Dict, List, Literal, Union
 
 from pydantic import BaseModel, EmailStr, Field
-
-from .api.ancillary import make_sample_id
 
 SupportedLanguages = Literal["Greek", "Croatian", "French", "German"]
 
@@ -104,7 +102,7 @@ class PcrTest(Dto):
     patient_pseudonym: str = Field(..., min_length=11, max_length=63)
     submitter_email: EmailStr
     collection_date: str = Field(..., regex=r"^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$")
-    sample_id: str = ""
+    sample_id: int = 0
     access_token: str = Field(default="", regex=r"^[a-zA-Z0-9]*$")
     status: StatusEnum = StatusEnum.PENDING
     test_result: TestResultEnum = TestResultEnum.UNSET
@@ -124,72 +122,3 @@ class UpdatePcrTest(Dto):
     test_result: TestResultEnum
     # the regex is slightly different: The date is considered mandatory here
     test_date: str = Field(..., regex=r"\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?")
-
-
-class MongoDao:
-    """A dummy DAO Implementation specifically for MongoDB so errors shut up"""
-
-    def __init__(self, dto_type: Type[Dto]):
-        self.dto_type = dto_type
-        self.db: Dict[Any, Any] = {}
-
-    def _dto_to_document(self, dto):
-        document = dto.dict()
-        return document
-
-    def _document_to_dto(self, document):
-        if "_id" in document:
-            document.pop("_id")
-        return self.dto_type(**document)
-
-    def find_by_key(self, key: int):
-        """Direct lookup by key"""
-        return self._document_to_dto(self.db[key])
-
-    def find_one(self, filters: Mapping[str, Any]):
-        """Find first item that matches criteria"""
-        for obj in self.db.values():
-            for fkey, fval in filters.items():
-                if obj[fkey] != fval:
-                    #  no match
-                    break
-            else:
-                # all values matched, procede with find
-                return self._document_to_dto(obj)
-        return {}
-
-    def insert_one(self, obj):
-        """Insert one item"""
-        document = self._dto_to_document(obj)
-        _id = make_sample_id()
-        self.db[_id] = document
-        return _id
-
-    def update_one(self, filters: Mapping[str, Any], replacement: Dto):
-        """Update given item"""
-        replacement_doc = self._dto_to_document(replacement)
-        for key, obj in self.db.items():
-            for fkey, fval in filters.items():
-                if obj[fkey] != fval:
-                    #  no match
-                    break
-            else:
-                # all values matched, procede with replacement
-                self.db[key] = replacement_doc
-                break
-        else:
-            return {}
-        return replacement
-
-    def delete_one(self, filters: Mapping[str, Any]):
-        """Delete an item"""
-        for key, obj in self.db.items():
-            for fkey, fval in filters.items():
-                if obj[fkey] != fval:
-                    #  no match
-                    break
-            else:
-                # all values matched, procede with deletion
-                self.db.pop(key)
-                return True
-        return False

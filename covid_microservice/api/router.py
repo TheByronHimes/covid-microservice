@@ -15,39 +15,23 @@
 #
 """
 Desc: Module that handles the main API functionality.
-Contents:
-    - help_find_sample()
-    - help_update_sample()
-    - get_sample()
-    - post_sample()
-    - update_sample()
 """
 
 from fastapi import APIRouter
 
-from ..models import MongoDao, NewSampleSubmission, PcrTest, UpdatePcrTest
-from .ancillary import make_access_token, make_sample_id
+from ..core.samples import help_find_sample, help_update_sample
+from ..core.utils import make_access_token, make_sample_id
+from ..dao import MongoDummyDao
+from ..models import NewSampleSubmission, PcrTest, UpdatePcrTest
 
-# Create connection to DB
-mdao = MongoDao(PcrTest)
+# Set up a DAO
+mdao = MongoDummyDao(PcrTest, "sample_id")
 
-
-# Helper functions that might get moved or replaced by something else.
-def help_find_sample(access_token: str) -> PcrTest:
-    """Find sample"""
-    return mdao.find_one({"access_token": access_token})
-
-
-def help_update_sample(access_token: str, new_data: PcrTest) -> PcrTest:
-    """Update sample"""
-    result = mdao.update_one({"access_token": access_token}, new_data)
-    return result
-
-
-# Establish routes
+# This APIRouter instance will be referenced/included by 'app' in main.py
 sample_router = APIRouter()
 
 
+# GET /sample
 @sample_router.get(
     "/sample/{access_token}", status_code=200, summary="Retrieve a existing sample"
 )
@@ -58,7 +42,7 @@ def get_sample(access_token: str):
         1. Return test sample information if found
     """
     access_token = access_token.strip()
-    sample = help_find_sample(access_token)
+    sample = help_find_sample(access_token, mdao)
     data_to_return = sample.dictify(
         [
             "patient_pseudonym",
@@ -72,6 +56,7 @@ def get_sample(access_token: str):
     return data_to_return
 
 
+# POST /sample
 @sample_router.post("/sample", status_code=201, summary="Upload a new sample")
 def post_sample(data: NewSampleSubmission):
     """
@@ -95,6 +80,7 @@ def post_sample(data: NewSampleSubmission):
     return data_to_return
 
 
+# PATCH /sample
 @sample_router.patch(
     "/sample", status_code=204, summary="Update an existing sample's test results"
 )
@@ -104,13 +90,13 @@ def update_sample(data: UpdatePcrTest):
     Handle PATCH req:
         1. Find sample with matching access_token
         2. Update sample
-        3. Return updated sample
+        3. Return success code (no body)
     """
-    sample = help_find_sample(data.access_token)
+    sample = help_find_sample(data.access_token, mdao)
     if isinstance(sample, PcrTest):
         sample.status = data.status
         sample.test_result = data.test_result
         sample.test_date = data.test_date
-        help_update_sample(data.access_token, sample)
+        help_update_sample(data.access_token, sample, mdao)
         return 204
     return 422

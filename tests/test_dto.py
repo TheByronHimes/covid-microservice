@@ -13,10 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+"""Test module for testing DTOs"""
 import pytest
 
-from covid_microservice.api.ancillary import make_sample_id
-from covid_microservice.models import PcrTest
+from covid_microservice.core.utils import make_sample_id
+from covid_microservice.models import Dto, PcrTest
+
+
+def test_pcrtest_is_dto():
+    """Make sure PcrTest is detected as a subclass of Dto"""
+    pcrtest = PcrTest(
+        sample_id=make_sample_id(),
+        patient_pseudonym="Alfredo Barnelli",
+        submitter_email="test@test.com",
+        collection_date="2022-08-21T11:18",
+        access_token="1234567812345678",
+    )
+    assert issubclass(PcrTest, Dto)
+    assert isinstance(pcrtest, Dto)
 
 
 def test_with_all_valid_input():

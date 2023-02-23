@@ -13,18 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-""" Helper functions """
-
-import secrets
-import string
-
-
-def make_access_token(num=16):
-    """Produce a string containing num random numbers and letters"""
-    chars = string.ascii_letters + string.digits
-    return "".join([secrets.choice(chars) for _ in range(num)])
+#
+"""Helper functions related to covid test sample data
+that might get moved or replaced by something else."""
+from ..dao import Dao
+from ..models import PcrTest
 
 
-def make_sample_id(bits=40):
-    """Produce a random bits-bit integer"""
-    return secrets.randbits(bits)
+def help_find_sample(access_token: str, dao: Dao) -> PcrTest:
+    """Find sample"""
+    return dao.find_one({"access_token": access_token})
+
+
+def help_update_sample(access_token: str, new_data: PcrTest, dao: Dao) -> PcrTest:
+    """Update sample"""
+    result = dao.update_one({"access_token": access_token}, new_data)
+    return result

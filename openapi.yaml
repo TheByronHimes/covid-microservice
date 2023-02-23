@@ -114,7 +114,7 @@ paths:
     patch:
       description: "Update a test sample with results.\nHandle PATCH req:\n    1.\
         \ Find sample with matching access_token\n    2. Update sample\n    3. Return\
-        \ updated sample"
+        \ success code (no body)"
       operationId: update_sample_sample_patch
       requestBody:
         content:

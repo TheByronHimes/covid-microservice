@@ -12,25 +12,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""Test dummy."""
-
-from covid_microservice.models import MongoDao, PcrTest
+#
 
 
-def test_mongo():
-    """tests MongoDao functions"""
-    mdao = MongoDao(PcrTest)
-    assert mdao.delete_one({"access_token": 23423423}) is False
+""" Ancillary functions, topic agnostic """
+
+import secrets
+import string
 
 
-def test_mongo_pcrtest():
-    """Make sure the MongoDao works with PcrTest usage"""
-    mdao = MongoDao(PcrTest)
-    pcr_test = PcrTest(
-        patient_pseudonym="test test test",
-        submitter_email="test@test.com",
-        collection_date="2022-08-21T11:18",
-    )
-    assert isinstance(mdao.insert_one(pcr_test), int) is True
-    assert mdao.find_one(pcr_test.dictify()) == pcr_test
+def make_access_token(num=16):
+    """Produce a string containing num random numbers and letters"""
+    chars = string.ascii_letters + string.digits
+    return "".join([secrets.choice(chars) for _ in range(num)])
+
+
+def make_sample_id(bits=40):
+    """Produce a random bits-bit integer"""
+    return secrets.randbits(bits)
