@@ -65,7 +65,7 @@ class Dto(BaseModel):
     def dictify(self, fields: Union[List[str], None] = None) -> Dict:
         """Returns a dictionary version of the object with only specified fields"""
         if fields is None:
-            fields = self.__fields__
+            fields = list(self.__fields__.keys())
         return {k: getattr(self, k) for k in fields}
 
 

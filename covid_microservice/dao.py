@@ -18,7 +18,6 @@
 from typing import Any, Dict, Mapping, Type
 
 from hexkit.providers.mongodb.provider import MongoDbConfig, MongoDbDaoFactory
-from pydantic import SecretStr
 
 from .models import Dto, PcrTest
 
@@ -96,14 +95,14 @@ class MongoDummyDao:
 class SamplesDaoFactoryConfig(MongoDbConfig):
     """Contains config for DAO Factory"""
 
-    db_connection_str: SecretStr = "mongodb://mongodb:27017"
-    db_name: str = "covid_db"
     collection_name = "samples"
 
 
 async def get_mongodb_pcrtest_dao():
     """Return usable DAO"""
-    config = SamplesDaoFactoryConfig()
+    config = SamplesDaoFactoryConfig(
+        db_connection_str="mongodb://mongodb:27017", db_name="covid_db"
+    )
     factory = MongoDbDaoFactory(config=config)
     return await factory.get_dao(
         name="samples", dto_model=PcrTest, id_field="access_token"
