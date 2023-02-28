@@ -5,7 +5,7 @@ cors_allowed_headers: null
 cors_allowed_methods: null
 cors_allowed_origins: null
 docs_url: /docs
-host: 0.0.0.0
+host: 127.0.0.1
 language: Greek
 log_level: info
 openapi_url: /openapi.json
