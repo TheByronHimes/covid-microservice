@@ -15,26 +15,12 @@
 #
 """ Holds DAO classes, including Dao Protocol class"""
 
-from typing import Any, Dict, Mapping, Protocol, Type, runtime_checkable
+from typing import Any, Dict, Mapping, Type
 
-from .models import Dto
+from hexkit.providers.mongodb.provider import MongoDbConfig, MongoDbDaoFactory
+from pydantic import SecretStr
 
-
-@runtime_checkable
-class Dao(Protocol):
-    """Protocol/Port of a generic DAO"""
-
-    def find_one(self, filters: Mapping[str, Any]) -> Dto:
-        """Find one item"""
-
-    def insert_one(self, obj: Dto) -> Any:
-        """Insert one item"""
-
-    def update_one(self, filters: Mapping[str, Any], replacement: Dto) -> Any:
-        """Update one item"""
-
-    def delete_one(self, filters: Mapping[str, Any]) -> Any:
-        """Delete one item"""
+from .models import Dto, PcrTest
 
 
 class MongoDummyDao:
@@ -105,3 +91,20 @@ class MongoDummyDao:
                 self.db.pop(key)
                 return True
         return False
+
+
+class SamplesDaoFactoryConfig(MongoDbConfig):
+    """Contains config for DAO Factory"""
+
+    db_connection_str: SecretStr = "mongodb://mongodb:27017"
+    db_name: str = "covid_db"
+    collection_name = "samples"
+
+
+async def get_mongodb_pcrtest_dao():
+    """Return usable DAO"""
+    config = SamplesDaoFactoryConfig()
+    factory = MongoDbDaoFactory(config=config)
+    return await factory.get_dao(
+        name="samples", dto_model=PcrTest, id_field="access_token"
+    )

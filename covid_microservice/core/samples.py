@@ -16,16 +16,18 @@
 #
 """Helper functions related to covid test sample data
 that might get moved or replaced by something else."""
-from ..dao import Dao
+from typing import Any
+
 from ..models import PcrTest
 
 
-def help_find_sample(access_token: str, dao: Dao) -> PcrTest:
+# 'Any' will be replaced with Dao or Type[Dao] again as soon as possible
+def help_find_sample(access_token: str, dao: Any) -> PcrTest:
     """Find sample"""
-    return dao.find_one({"access_token": access_token})
+    return dao.find_one(mapping={"access_token": access_token})
 
 
-def help_update_sample(access_token: str, new_data: PcrTest, dao: Dao) -> PcrTest:
+def help_update_sample(dto: PcrTest, dao: Any) -> None:
     """Update sample"""
-    result = dao.update_one({"access_token": access_token}, new_data)
-    return result
+    # result = dao.update(mapping = {"access_token": access_token}, new_data)
+    dao.update(dto=dto)

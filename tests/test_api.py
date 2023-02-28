@@ -14,11 +14,27 @@
 # limitations under the License.
 #
 
+import asyncio
+
+import pytest
+
 from covid_microservice.api import router
 from covid_microservice.models import NewSampleSubmission, UpdatePcrTest
 
 
-def test_post_sample_nominal():
+@pytest.fixture(scope="session")
+def event_loop():
+    """Override pytest-asyncio EL fixture so we can do multiple async tests"""
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
+
+
+@pytest.mark.asyncio
+async def test_post_sample_nominal():
     """Test the /sample POST function"""
     data = NewSampleSubmission(
         patient_pseudonym="test test test",
@@ -26,21 +42,22 @@ def test_post_sample_nominal():
         collection_date="2022-08-21T11:18",
     )
 
-    obj = router.post_sample(data)
+    obj = await router.post_sample(data)
     assert isinstance(obj, dict)
     assert "sample_id" in obj
     assert "access_token" in obj
     assert len(obj.keys()) == 2
 
 
-def test_update_sample_nominal():
+@pytest.mark.asyncio()
+async def test_update_sample_nominal():
     """Test that the update function works when it should"""
     data = NewSampleSubmission(
         patient_pseudonym="Franklin York",
         submitter_email="test@test.com",
         collection_date="2022-08-21T11:11",
     )
-    result = router.post_sample(data)
+    result = await router.post_sample(data)
     access_token = result["access_token"]
 
     updates = UpdatePcrTest(
@@ -49,11 +66,12 @@ def test_update_sample_nominal():
         test_result="positive",
         test_date="2022-08-23T08:37",
     )
-    response = router.update_sample(updates)
+    response = await router.update_sample(updates)
     assert response == 204
 
 
-def test_update_non_existent_sample():
+@pytest.mark.asyncio
+async def test_update_non_existent_sample():
     """Receive 422 code upon updating non-existent sample (bad access token)"""
     updates = UpdatePcrTest(
         access_token="doesnotexist",
@@ -61,5 +79,28 @@ def test_update_non_existent_sample():
         test_result="positive",
         test_date="2022-08-23T08:37",
     )
-    response = router.update_sample(updates)
+    response = await router.update_sample(updates)
     assert response == 422
+
+
+@pytest.mark.asyncio
+async def test_get_nonexistent_sample():
+    """Test what happens when a user searches with a bad access token"""
+    data = await router.get_sample(access_token="doesnotexist")
+    assert data == {}
+
+
+@pytest.mark.asyncio
+async def test_get_existing_sample():
+    """Make sure nominal retrieval works"""
+    data = NewSampleSubmission(
+        patient_pseudonym="Franklin York 2",
+        submitter_email="test@test.com",
+        collection_date="2022-08-21T11:11",
+    )
+    result = await router.post_sample(data)
+    access_token = result["access_token"]
+
+    response = await router.get_sample(access_token=access_token)
+    assert isinstance(response, dict)
+    assert response["patient_pseudonym"] == "Franklin York 2"

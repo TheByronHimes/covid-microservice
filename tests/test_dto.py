@@ -18,7 +18,7 @@
 import pytest
 
 from covid_microservice.core.utils import make_sample_id
-from covid_microservice.models import Dto, PcrTest
+from covid_microservice.models import Dto, NewSampleSubmission, PcrTest
 
 
 def test_pcrtest_is_dto():
@@ -34,7 +34,7 @@ def test_pcrtest_is_dto():
     assert isinstance(pcrtest, Dto)
 
 
-def test_with_all_valid_input():
+def test_pcrtest_with_all_valid_input():
     """Uses valid input to add an object"""
     pcrtest = PcrTest(
         sample_id=make_sample_id(),
@@ -47,7 +47,7 @@ def test_with_all_valid_input():
 
 
 @pytest.mark.xfail
-def test_with_too_long_name():
+def test_pcrtest_with_too_long_name():
     """test pcrtest patient pseudonym max length"""
     PcrTest(
         sample_id=make_sample_id(),
@@ -60,7 +60,7 @@ def test_with_too_long_name():
 
 
 @pytest.mark.xfail
-def test_with_too_short_name():
+def test_pcrtest_with_too_short_name():
     """Test pcrtest patient pseudonym min length"""
     PcrTest(
         sample_id=make_sample_id(),
@@ -72,7 +72,7 @@ def test_with_too_short_name():
 
 
 @pytest.mark.xfail
-def test_with_invalid_email_format():
+def test_pcrtest_with_invalid_email_format():
     """test pcrtest email format"""
     PcrTest(
         sample_id=make_sample_id(),
@@ -84,7 +84,7 @@ def test_with_invalid_email_format():
 
 
 @pytest.mark.xfail
-def test_with_bad_status():
+def test_pcrtest_with_bad_status():
     """Test pcrtest status enums"""
     PcrTest(
         sample_id=make_sample_id(),
@@ -97,7 +97,7 @@ def test_with_bad_status():
 
 
 @pytest.mark.xfail
-def test_with_bad_test_result():
+def test_pcrtest_with_bad_test_result():
     """Test pcrtest test_result enums"""
     PcrTest(
         sample_id=make_sample_id(),
@@ -111,7 +111,7 @@ def test_with_bad_test_result():
 
 
 @pytest.mark.xfail
-def test_with_too_long_email():
+def test_pcrtest_with_too_long_email():
     """Test pcrtest email char limit"""
     PcrTest(
         sample_id=make_sample_id(),
@@ -127,7 +127,7 @@ def test_with_too_long_email():
 
 
 @pytest.mark.xfail
-def test_with_invalid_token():
+def test_pcrtest_with_invalid_token():
     """Test pcrtest access_token valid chars"""
     PcrTest(
         sample_id=make_sample_id(),
@@ -139,7 +139,7 @@ def test_with_invalid_token():
 
 
 @pytest.mark.xfail
-def test_with_date_no_t():
+def test_pcrtest_with_date_no_t():
     """Test pcrtest collection_date formatting"""
     PcrTest(
         sample_id=make_sample_id(),
@@ -151,7 +151,7 @@ def test_with_date_no_t():
 
 
 @pytest.mark.xfail
-def test_with_date_short_year():
+def test_pcrtest_with_date_short_year():
     """Test pcrtest year formatting in collection_date"""
     PcrTest(
         sample_id=make_sample_id(),
@@ -163,7 +163,7 @@ def test_with_date_short_year():
 
 
 @pytest.mark.xfail
-def test_with_date_with_milliseconds():
+def test_pcrtest_with_date_with_milliseconds():
     """Test pcrtest collection date with milliseconds (not allowed)"""
     PcrTest(
         sample_id=make_sample_id(),
@@ -171,4 +171,80 @@ def test_with_date_with_milliseconds():
         submitter_email="test@test.com",
         collection_date="2022-08-21T11:18.357",
         access_token="93234567812345678",
+    )
+
+
+###########
+# New Sample Submission Tests
+###########
+
+
+def test_nss_with_all_valid_input():
+    """Uses valid input to add an object"""
+    nss = NewSampleSubmission(
+        patient_pseudonym="Alfredo Barnelli",
+        submitter_email="test@test.com",
+        collection_date="2022-08-21T11:18",
+    )
+    assert isinstance(nss, NewSampleSubmission)
+
+
+@pytest.mark.xfail
+def test_nss_with_too_long_name():
+    """test pcrtest patient pseudonym max length"""
+    NewSampleSubmission(
+        patient_pseudonym="sadfasdfasdfasdasdfkjalsdkjflaks\
+            djlfkasdlkfasldkfjalksdjfsdfdfdd",
+        submitter_email="test@test.com",
+        collection_date="2022-08-21T11:18",
+    )
+
+
+@pytest.mark.xfail
+def test_nss_with_too_short_name():
+    """Test pcrtest patient pseudonym min length"""
+    NewSampleSubmission(
+        patient_pseudonym="0123456789",
+        submitter_email="test@test.com",
+        collection_date="2022-08-21T11:18",
+    )
+
+
+@pytest.mark.xfail
+def test_nss_with_invalid_email_format():
+    """test pcrtest email format"""
+    NewSampleSubmission(
+        patient_pseudonym="Alfredo Barnelli",
+        submitter_email="testtest.com",
+        collection_date="2022-08-21T11:18",
+    )
+
+
+@pytest.mark.xfail
+def test_nss_with_date_no_t():
+    """Test pcrtest collection_date formatting"""
+    NewSampleSubmission(
+        patient_pseudonym="Alfredo Barnelli",
+        submitter_email="test@test.com",
+        collection_date="2022-08-21 11:18",
+    )
+
+
+@pytest.mark.xfail
+def test_nss_with_date_short_year():
+    """Test pcrtest year formatting in collection_date"""
+    NewSampleSubmission(
+        patient_pseudonym="Alfredo Barnelli",
+        submitter_email="test@test.com",
+        collection_date="22-08-21T11:18",
+    )
+
+
+@pytest.mark.xfail
+def test_nss_with_date_with_milliseconds():
+    """Test pcrtest collection date with milliseconds (not allowed)"""
+    NewSampleSubmission(
+        patient_pseudonym="Alfredo Barnelli",
+        submitter_email="test@test.com",
+        collection_date="2022-08-21T11:18.357",
     )

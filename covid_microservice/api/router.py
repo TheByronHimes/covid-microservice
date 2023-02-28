@@ -17,15 +17,18 @@
 Desc: Module that handles the main API functionality.
 """
 
-from fastapi import APIRouter
+import asyncio
 
-from ..core.samples import help_find_sample, help_update_sample
+from fastapi import APIRouter
+from hexkit.protocols.dao import ResourceNotFoundError
+
 from ..core.utils import make_access_token, make_sample_id
-from ..dao import MongoDummyDao
+from ..dao import get_mongodb_pcrtest_dao
 from ..models import NewSampleSubmission, PcrTest, UpdatePcrTest
 
 # Set up a DAO
-mdao = MongoDummyDao(PcrTest, "sample_id")
+mdao = asyncio.run(get_mongodb_pcrtest_dao())
+
 
 # This APIRouter instance will be referenced/included by 'app' in main.py
 sample_router = APIRouter()
@@ -35,48 +38,52 @@ sample_router = APIRouter()
 @sample_router.get(
     "/sample/{access_token}", status_code=200, summary="Retrieve a existing sample"
 )
-def get_sample(access_token: str):
+async def get_sample(access_token: str):
     """
     Search for a test sample matching the access token.
     Handle GET req:
         1. Return test sample information if found
     """
-    access_token = access_token.strip()
-    sample = help_find_sample(access_token, mdao)
-    data_to_return = sample.dictify(
-        [
-            "patient_pseudonym",
-            "submitter_email",
-            "collection_date",
-            "status",
-            "test_result",
-            "test_date",
-        ]
-    )
-    return data_to_return
+    try:
+        sample = await mdao.get_by_id(access_token.strip())
+        data_to_return = sample.dictify(
+            [
+                "patient_pseudonym",
+                "submitter_email",
+                "collection_date",
+                "status",
+                "test_result",
+                "test_date",
+            ]
+        )
+        return data_to_return
+    except ResourceNotFoundError:
+        return {}
 
 
 # POST /sample
 @sample_router.post("/sample", status_code=201, summary="Upload a new sample")
-def post_sample(data: NewSampleSubmission):
+async def post_sample(data: NewSampleSubmission):
     """
     Upload a new sample.
     Handle POST req:
         1. Insert new data
         2. Return sample_id and access_token
     """
+    sample_id = make_sample_id()
+    access_token = make_access_token()
     pcrtest = PcrTest(
         patient_pseudonym=data.patient_pseudonym,
         submitter_email=data.submitter_email,
         collection_date=data.collection_date,
-        sample_id=make_sample_id(),
-        access_token=make_access_token(),
+        sample_id=sample_id,
+        access_token=access_token,
     )
 
-    record_id = mdao.insert_one(pcrtest)
-    sample = mdao.find_by_key(record_id)
-    data_to_return = sample.dictify(["sample_id", "access_token"])
-    #
+    await mdao.insert(pcrtest)
+    result = await mdao.get_by_id(access_token)
+    data_to_return = result.dictify(["sample_id", "access_token"])
+
     return data_to_return
 
 
@@ -84,7 +91,7 @@ def post_sample(data: NewSampleSubmission):
 @sample_router.patch(
     "/sample", status_code=204, summary="Update an existing sample's test results"
 )
-def update_sample(data: UpdatePcrTest):
+async def update_sample(data: UpdatePcrTest):
     """
     Update a test sample with results.
     Handle PATCH req:
@@ -92,11 +99,12 @@ def update_sample(data: UpdatePcrTest):
         2. Update sample
         3. Return success code (no body)
     """
-    sample = help_find_sample(data.access_token, mdao)
-    if isinstance(sample, PcrTest):
+    try:
+        sample = await mdao.get_by_id(data.access_token)
         sample.status = data.status
         sample.test_result = data.test_result
         sample.test_date = data.test_date
-        help_update_sample(data.access_token, sample, mdao)
+        await mdao.update(sample)
         return 204
-    return 422
+    except ResourceNotFoundError:
+        return 422
