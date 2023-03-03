@@ -17,18 +17,14 @@
 Desc: Module that handles the main API functionality.
 """
 
-import asyncio
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from fastapi.exceptions import HTTPException
 from hexkit.protocols.dao import ResourceNotFoundError
 
 from ..core.utils import make_access_token, make_sample_id
 from ..dao import get_mongodb_pcrtest_dao
-from ..models import NewSampleSubmission, PcrTest, UpdatePcrTest
-
-# Set up a DAO
-mdao = asyncio.run(get_mongodb_pcrtest_dao())
-
+from ..models import NewSampleResponse, NewSampleSubmission, PcrTest, UpdatePcrTest
 
 # This APIRouter instance will be referenced/included by 'app' in main.py
 sample_router = APIRouter()
@@ -38,7 +34,7 @@ sample_router = APIRouter()
 @sample_router.get(
     "/sample/{access_token}", status_code=200, summary="Retrieve a existing sample"
 )
-async def get_sample(access_token: str):
+async def get_sample(access_token: str, mdao=Depends(get_mongodb_pcrtest_dao)):
     """
     Search for a test sample matching the access token.
     Handle GET req:
@@ -62,8 +58,12 @@ async def get_sample(access_token: str):
 
 
 # POST /sample
-@sample_router.post("/sample", status_code=201, summary="Upload a new sample")
-async def post_sample(data: NewSampleSubmission):
+@sample_router.post(
+    "/sample",
+    summary="Upload a new sample",
+    status_code=201,
+)
+async def post_sample(data: NewSampleSubmission, mdao=Depends(get_mongodb_pcrtest_dao)):
     """
     Upload a new sample.
     Handle POST req:
@@ -82,16 +82,18 @@ async def post_sample(data: NewSampleSubmission):
 
     await mdao.insert(pcrtest)
     result = await mdao.get_by_id(access_token)
-    data_to_return = result.dictify(["sample_id", "access_token"])
+    sample_response = NewSampleResponse(
+        access_token=result.access_token, sample_id=result.sample_id
+    )
 
-    return data_to_return
+    return sample_response
 
 
 # PATCH /sample
 @sample_router.patch(
     "/sample", status_code=204, summary="Update an existing sample's test results"
 )
-async def update_sample(data: UpdatePcrTest):
+async def update_sample(data: UpdatePcrTest, mdao=Depends(get_mongodb_pcrtest_dao)):
     """
     Update a test sample with results.
     Handle PATCH req:
@@ -106,5 +108,7 @@ async def update_sample(data: UpdatePcrTest):
         sample.test_date = data.test_date
         await mdao.update(sample)
         return 204
-    except ResourceNotFoundError:
-        return 422
+    except ResourceNotFoundError as exc:
+        raise HTTPException(
+            status_code=404, detail="Specified resource was not found."
+        ) from exc

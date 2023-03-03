@@ -96,6 +96,13 @@ class NewSampleSubmission(BaseModel):
     collection_date: str = Field(..., regex=r"^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$")
 
 
+class NewSampleResponse(BaseModel):
+    """Model to deliver access_token and sample_id after posting new sample"""
+
+    access_token: str
+    sample_id: int
+
+
 class PcrTest(Dto):
     """Simple DTO for the PCR tests"""
 
