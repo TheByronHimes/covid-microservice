@@ -9,6 +9,20 @@ components:
           type: array
       title: HTTPValidationError
       type: object
+    NewSampleResponse:
+      description: Model to deliver access_token and sample_id after posting new sample
+      properties:
+        access_token:
+          title: Access Token
+          type: string
+        sample_id:
+          title: Sample Id
+          type: integer
+      required:
+      - access_token
+      - sample_id
+      title: NewSampleResponse
+      type: object
     NewSampleSubmission:
       description: 'Pydantic model to perform validation on new submission data.
 
@@ -112,9 +126,13 @@ paths:
       summary: Greet the world
   /sample:
     patch:
-      description: "Update a test sample with results.\nHandle PATCH req:\n    1.\
-        \ Find sample with matching access_token\n    2. Update sample\n    3. Return\
-        \ success code (no body)"
+      description: "Update a test sample with new test results.\n\nArgs:\n    data\
+        \ (UpdatePcrTest): A data object containing the updated test results,\n  \
+        \  including status, test_result, and test_date.\n    mdao: A MongoDB DAO\
+        \ object for accessing the database.\n\nReturns:\n    None. Returns a 204\
+        \ No Content status code if the update was successful.\n\nRaises:\n    HTTPException:\
+        \ If the test sample with the matching access_token cannot be\n    found,\
+        \ raises a 404 Not Found error."
       operationId: update_sample_sample_patch
       requestBody:
         content:
@@ -133,8 +151,10 @@ paths:
           description: Validation Error
       summary: Update an existing sample's test results
     post:
-      description: "Upload a new sample.\nHandle POST req:\n    1. Insert new data\n\
-        \    2. Return sample_id and access_token"
+      description: "Upload a new sample.\n\nArgs:\n    data (NewSampleSubmission):\
+        \ The data for the new sample.\n    mdao: A MongoDB DAO object for accessing\
+        \ the database.\n\nReturns:\n    NewSampleResponse: The access token and sample\
+        \ ID for the new sample."
       operationId: post_sample_sample_post
       requestBody:
         content:
@@ -146,7 +166,8 @@ paths:
         '201':
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/NewSampleResponse'
           description: Successful Response
         '422':
           content:
@@ -157,8 +178,11 @@ paths:
       summary: Upload a new sample
   /sample/{access_token}:
     get:
-      description: "Search for a test sample matching the access token.\nHandle GET\
-        \ req:\n    1. Return test sample information if found"
+      description: "Retrieve information for a test sample matching the access token.\n\
+        \nArgs:\n    access_token (str): The access token for the sample.\n    mdao:\
+        \ A MongoDB DAO object for accessing the database.\n\nReturns:\n    dict:\
+        \ A dictionary containing the sample information.\n\nRaises:\n    HTTPException:\
+        \ If the specified resource was not found."
       operationId: get_sample_sample__access_token__get
       parameters:
       - in: path
@@ -171,7 +195,9 @@ paths:
         '200':
           content:
             application/json:
-              schema: {}
+              schema:
+                title: Response Get Sample Sample  Access Token  Get
+                type: object
           description: Successful Response
         '422':
           content:
