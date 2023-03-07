@@ -20,15 +20,17 @@ from hexkit.providers.mongodb.testutils import (  # noqa: F401; pylint: disable=
     mongodb_fixture,
 )
 
+from covid_microservice.api.deps import get_mongodb_pcrtest_dao
 from covid_microservice.api.main import app
-from covid_microservice.dao import get_mongodb_pcrtest_dao
 from covid_microservice.models import PcrTest
 
 SAMPLE_URL = "/sample"
 
 
 @pytest_asyncio.fixture(name="client_with_db")
-async def fixture_client_with_db(mongodb_fixture):  # noqa: F811;
+async def fixture_client_with_db(
+    mongodb_fixture,  # noqa: F811; pylint: disable=redefined-outer-name
+):
     """Yield a TestClient with a test db. This replaces the DAO dependency in
     the Router instance with the test DAO produced here"""
     dao = await mongodb_fixture.dao_factory.get_dao(

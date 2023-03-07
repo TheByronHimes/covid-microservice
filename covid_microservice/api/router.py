@@ -21,10 +21,13 @@ Desc: Module that handles the main API functionality.
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from hexkit.protocols.dao import ResourceNotFoundError
+from hexkit.providers.mongodb.provider import MongoDbDaoNaturalId
 
 from ..core.utils import make_access_token, make_sample_id
-from ..dao import get_mongodb_pcrtest_dao
 from ..models import NewSampleResponse, NewSampleSubmission, PcrTest, UpdatePcrTest
+from .deps import get_mongodb_pcrtest_dao
+
+MSG_NOT_FOUND = "Specified resource was not found."
 
 # This APIRouter instance will be referenced/included by 'app' in main.py
 sample_router = APIRouter()
@@ -32,13 +35,26 @@ sample_router = APIRouter()
 
 # GET /sample
 @sample_router.get(
-    "/sample/{access_token}", status_code=200, summary="Retrieve a existing sample"
+    "/sample/{access_token}",
+    status_code=200,
+    summary="Retrieve a existing sample",
+    response_model=dict,
 )
-async def get_sample(access_token: str, mdao=Depends(get_mongodb_pcrtest_dao)):
+async def get_sample(
+    access_token: str, mdao: MongoDbDaoNaturalId = Depends(get_mongodb_pcrtest_dao)
+) -> dict:
     """
-    Search for a test sample matching the access token.
-    Handle GET req:
-        1. Return test sample information if found
+    Retrieve information for a test sample matching the access token.
+
+    Args:
+        access_token (str): The access token for the sample.
+        mdao: A MongoDB DAO object for accessing the database.
+
+    Returns:
+        dict: A dictionary containing the sample information.
+
+    Raises:
+        HTTPException: If the specified resource was not found.
     """
     try:
         sample = await mdao.get_by_id(access_token.strip())
@@ -53,8 +69,8 @@ async def get_sample(access_token: str, mdao=Depends(get_mongodb_pcrtest_dao)):
             ]
         )
         return data_to_return
-    except ResourceNotFoundError:
-        return {}
+    except ResourceNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=MSG_NOT_FOUND) from exc
 
 
 # POST /sample
@@ -62,13 +78,21 @@ async def get_sample(access_token: str, mdao=Depends(get_mongodb_pcrtest_dao)):
     "/sample",
     summary="Upload a new sample",
     status_code=201,
+    response_model=NewSampleResponse,
 )
-async def post_sample(data: NewSampleSubmission, mdao=Depends(get_mongodb_pcrtest_dao)):
+async def post_sample(
+    data: NewSampleSubmission,
+    mdao: MongoDbDaoNaturalId = Depends(get_mongodb_pcrtest_dao),
+) -> NewSampleResponse:
     """
     Upload a new sample.
-    Handle POST req:
-        1. Insert new data
-        2. Return sample_id and access_token
+
+    Args:
+        data (NewSampleSubmission): The data for the new sample.
+        mdao: A MongoDB DAO object for accessing the database.
+
+    Returns:
+        NewSampleResponse: The access token and sample ID for the new sample.
     """
     sample_id = make_sample_id()
     access_token = make_access_token()
@@ -91,15 +115,28 @@ async def post_sample(data: NewSampleSubmission, mdao=Depends(get_mongodb_pcrtes
 
 # PATCH /sample
 @sample_router.patch(
-    "/sample", status_code=204, summary="Update an existing sample's test results"
+    "/sample",
+    status_code=204,
+    summary="Update an existing sample's test results",
+    response_model=None,
 )
-async def update_sample(data: UpdatePcrTest, mdao=Depends(get_mongodb_pcrtest_dao)):
+async def update_sample(
+    data: UpdatePcrTest, mdao: MongoDbDaoNaturalId = Depends(get_mongodb_pcrtest_dao)
+):
     """
-    Update a test sample with results.
-    Handle PATCH req:
-        1. Find sample with matching access_token
-        2. Update sample
-        3. Return success code (no body)
+    Update a test sample with new test results.
+
+    Args:
+        data (UpdatePcrTest): A data object containing the updated test results,
+        including status, test_result, and test_date.
+        mdao: A MongoDB DAO object for accessing the database.
+
+    Returns:
+        None. Returns a 204 No Content status code if the update was successful.
+
+    Raises:
+        HTTPException: If the test sample with the matching access_token cannot be
+        found, raises a 404 Not Found error.
     """
     try:
         sample = await mdao.get_by_id(data.access_token)
@@ -109,6 +146,4 @@ async def update_sample(data: UpdatePcrTest, mdao=Depends(get_mongodb_pcrtest_da
         await mdao.update(sample)
         return 204
     except ResourceNotFoundError as exc:
-        raise HTTPException(
-            status_code=404, detail="Specified resource was not found."
-        ) from exc
+        raise HTTPException(status_code=404, detail=MSG_NOT_FOUND) from exc

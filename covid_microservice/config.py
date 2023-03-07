@@ -17,11 +17,17 @@
 
 from ghga_service_chassis_lib.api import ApiConfigBase
 from ghga_service_chassis_lib.config import config_from_yaml
+from hexkit.providers.mongodb.provider import MongoDbConfig
 
 from .models import SupportedLanguages
 
 
-# Please adapt config prefix and remove unnecessary config bases:
+class SamplesDaoFactoryConfig(MongoDbConfig):
+    """Contains config for DAO Factory"""
+
+    collection_name = "samples"
+
+
 @config_from_yaml(prefix="covid_microservice")
 class Config(ApiConfigBase):
     """Config parameters and their defaults."""
