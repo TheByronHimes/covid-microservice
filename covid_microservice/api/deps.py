@@ -13,9 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Test dummy."""
+"""FastAPI dependencies (used with the `Depends` feature)"""
+from hexkit.providers.mongodb.provider import MongoDbDaoFactory
+
+from ..config import CONFIG, SamplesDaoFactoryConfig
+from ..core.models import PcrTest
 
 
-def test_dummy():
-    """Just makes the CI pass."""
-    assert True
+def get_config():
+    """Get runtime configuration."""
+    return CONFIG
+
+
+async def get_mongodb_pcrtest_dao():
+    """Return usable DAO"""
+    config = SamplesDaoFactoryConfig(
+        db_connection_str="mongodb://mongodb:27017", db_name="covid_db"
+    )
+    factory = MongoDbDaoFactory(config=config)
+    return await factory.get_dao(
+        name="samples", dto_model=PcrTest, id_field="access_token"
+    )

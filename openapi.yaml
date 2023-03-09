@@ -1,37 +1,5 @@
 components:
   schemas:
-    Greeting:
-      description: A container storing a greeting for a specfic person incl. metadata
-      properties:
-        created_at:
-          description: The date/time when the message was created
-          format: date-time
-          title: Created At
-          type: string
-        isinformal:
-          description: Is the expression used in informal contexts?
-          title: Isinformal
-          type: boolean
-        language:
-          description: The language.
-          enum:
-          - Greek
-          - Croatian
-          - French
-          - German
-          title: Language
-          type: string
-        message:
-          description: The message content.
-          title: Message
-          type: string
-      required:
-      - message
-      - created_at
-      - language
-      - isinformal
-      title: Greeting
-      type: object
     HTTPValidationError:
       properties:
         detail:
@@ -40,6 +8,84 @@ components:
           title: Detail
           type: array
       title: HTTPValidationError
+      type: object
+    NewSampleResponse:
+      description: Model to deliver access_token and sample_id after posting new sample
+      properties:
+        access_token:
+          title: Access Token
+          type: string
+        sample_id:
+          title: Sample Id
+          type: integer
+      required:
+      - access_token
+      - sample_id
+      title: NewSampleResponse
+      type: object
+    NewSampleSubmission:
+      description: 'Pydantic model to perform validation on new submission data.
+
+        This is separate from the PcrTest to prevent someone from submitting
+
+        their own access token.'
+      properties:
+        collection_date:
+          pattern: ^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$
+          title: Collection Date
+          type: string
+        patient_pseudonym:
+          maxLength: 63
+          minLength: 11
+          title: Patient Pseudonym
+          type: string
+        submitter_email:
+          format: email
+          title: Submitter Email
+          type: string
+      required:
+      - patient_pseudonym
+      - submitter_email
+      - collection_date
+      title: NewSampleSubmission
+      type: object
+    StatusEnum:
+      description: Enumeration for PcrTest status values
+      enum:
+      - pending
+      - completed
+      - failed
+      title: StatusEnum
+      type: string
+    TestResultEnum:
+      description: Enumeration for PcrTest test_result values
+      enum:
+      - ''
+      - positive
+      - negative
+      title: TestResultEnum
+      type: string
+    UpdatePcrTest:
+      description: Update DTO for PcrTest
+      properties:
+        access_token:
+          pattern: ^[a-zA-Z0-9]*$
+          title: Access Token
+          type: string
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        test_date:
+          pattern: \d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?
+          title: Test Date
+          type: string
+        test_result:
+          $ref: '#/components/schemas/TestResultEnum'
+      required:
+      - access_token
+      - status
+      - test_result
+      - test_date
+      title: UpdatePcrTest
       type: object
     ValidationError:
       properties:
@@ -78,31 +124,24 @@ paths:
               schema: {}
           description: Successful Response
       summary: Greet the world
-  /greet/{name}:
-    get:
-      description: Greet a person by name. You may choose a formal or an informal
-        greeting.The language for the greeting is configured in the backend.
-      operationId: greet_greet__name__get
-      parameters:
-      - in: path
-        name: name
+  /sample:
+    patch:
+      description: "Update a test sample with new test results.\n\nArgs:\n    data\
+        \ (UpdatePcrTest): A data object containing the updated test results,\n  \
+        \  including status, test_result, and test_date.\n    mdao: A MongoDB DAO\
+        \ object for accessing the database.\n\nReturns:\n    None. Returns a 204\
+        \ No Content status code if the update was successful.\n\nRaises:\n    HTTPException:\
+        \ If the test sample with the matching access_token cannot be\n    found,\
+        \ raises a 404 Not Found error."
+      operationId: update_sample_sample_patch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePcrTest'
         required: true
-        schema:
-          title: Name
-          type: string
-      - in: query
-        name: isinformal
-        required: false
-        schema:
-          default: true
-          title: Isinformal
-          type: boolean
       responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Greeting'
+        '204':
           description: Successful Response
         '422':
           content:
@@ -110,4 +149,60 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
           description: Validation Error
-      summary: Greet a person
+      summary: Update an existing sample's test results
+    post:
+      description: "Upload a new sample.\n\nArgs:\n    data (NewSampleSubmission):\
+        \ The data for the new sample.\n    mdao: A MongoDB DAO object for accessing\
+        \ the database.\n\nReturns:\n    NewSampleResponse: The access token and sample\
+        \ ID for the new sample."
+      operationId: post_sample_sample_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewSampleSubmission'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewSampleResponse'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Upload a new sample
+  /sample/{access_token}:
+    get:
+      description: "Retrieve information for a test sample matching the access token.\n\
+        \nArgs:\n    access_token (str): The access token for the sample.\n    mdao:\
+        \ A MongoDB DAO object for accessing the database.\n\nReturns:\n    dict:\
+        \ A dictionary containing the sample information.\n\nRaises:\n    HTTPException:\
+        \ If the specified resource was not found."
+      operationId: get_sample_sample__access_token__get
+      parameters:
+      - in: path
+        name: access_token
+        required: true
+        schema:
+          title: Access Token
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                title: Response Get Sample Sample  Access Token  Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Retrieve a existing sample

@@ -19,5 +19,5 @@
 # flake8: noqa
 # pylint: skip-file
 
-# Please adapt to package structure:
-from my_microservice.api.main import app
+
+from covid_microservice.api.main import app

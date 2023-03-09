@@ -13,32 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-## creating building container
-FROM python:3.10-slim AS builder
-# update and install dependencies
-RUN apt update
-RUN apt upgrade -y
-RUN pip install build
-# copy code
-COPY . /service
-WORKDIR /service
-# build wheel
-RUN python -m build
+"""Entrypoint of the package"""
+import asyncio
 
-# creating running container
-FROM python:3.10-slim
-# update and install dependencies
-RUN apt update
-RUN apt upgrade -y
-# copy and install wheel
-WORKDIR /service
-COPY --from=builder /service/dist/ /service
-RUN pip install *.whl
-# create new user and execute as that user
-RUN useradd --create-home appuser
-WORKDIR /home/appuser
-USER appuser
-# set environment
-ENV PYTHONUNBUFFERED=1
+from ghga_service_chassis_lib.api import run_server
 
-ENTRYPOINT ["covid-microservice"]
+from .api.main import app  # noqa: F401 pylint: disable=unused-import
+from .config import CONFIG, Config
+
+
+def run(config: Config = CONFIG):
+    """Run the service"""
+    asyncio.run(run_server(app="covid_microservice.__main__:app", config=config))
+
+
+if __name__ == "__main__":
+    run()

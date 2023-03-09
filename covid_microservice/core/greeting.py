@@ -18,7 +18,7 @@
 import random
 from datetime import datetime
 
-from ..models import Greeting, GreetingExpression
+from .models import Greeting, GreetingExpression
 
 GREETINGS_EXPRESSIONS = [
     GreetingExpression(expression="Καλημέρα", language="Greek", isinformal=False),
