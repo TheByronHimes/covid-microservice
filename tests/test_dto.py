@@ -17,8 +17,8 @@
 """Test module for testing DTOs"""
 import pytest
 
+from covid_microservice.core.models import Dto, NewSampleSubmission, PcrTest
 from covid_microservice.core.utils import make_sample_id
-from covid_microservice.models import Dto, NewSampleSubmission, PcrTest
 
 
 def test_pcrtest_is_dto():

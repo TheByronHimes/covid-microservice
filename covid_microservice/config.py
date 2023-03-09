@@ -19,7 +19,7 @@ from ghga_service_chassis_lib.api import ApiConfigBase
 from ghga_service_chassis_lib.config import config_from_yaml
 from hexkit.providers.mongodb.provider import MongoDbConfig
 
-from .models import SupportedLanguages
+from .core.models import SupportedLanguages
 
 
 class SamplesDaoFactoryConfig(MongoDbConfig):

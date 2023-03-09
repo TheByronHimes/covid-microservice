@@ -18,7 +18,7 @@
 that might get moved or replaced by something else."""
 from typing import Any
 
-from ..models import PcrTest
+from .models import PcrTest
 
 
 # 'Any' will be replaced with Dao or Type[Dao] again as soon as possible

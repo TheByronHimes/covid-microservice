@@ -17,7 +17,7 @@
 from hexkit.providers.mongodb.provider import MongoDbDaoFactory
 
 from ..config import CONFIG, SamplesDaoFactoryConfig
-from ..models import PcrTest
+from ..core.models import PcrTest
 
 
 def get_config():

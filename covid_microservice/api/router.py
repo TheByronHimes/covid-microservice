@@ -23,8 +23,8 @@ from fastapi.exceptions import HTTPException
 from hexkit.protocols.dao import ResourceNotFoundError
 from hexkit.providers.mongodb.provider import MongoDbDaoNaturalId
 
+from ..core.models import NewSampleResponse, NewSampleSubmission, PcrTest, UpdatePcrTest
 from ..core.utils import make_access_token, make_sample_id
-from ..models import NewSampleResponse, NewSampleSubmission, PcrTest, UpdatePcrTest
 from .deps import get_mongodb_pcrtest_dao
 
 MSG_NOT_FOUND = "Specified resource was not found."

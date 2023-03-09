@@ -22,7 +22,7 @@ from hexkit.providers.mongodb.testutils import (  # noqa: F401; pylint: disable=
 
 from covid_microservice.api.deps import get_mongodb_pcrtest_dao
 from covid_microservice.api.main import app
-from covid_microservice.models import PcrTest
+from covid_microservice.core.models import PcrTest
 
 SAMPLE_URL = "/sample"
 
