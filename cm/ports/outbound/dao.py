@@ -13,14 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# pylint: disable=unused-import
+"""DAO port"""
+from hexkit.protocols.dao import ResourceAlreadyExistsError  # noqa
+from hexkit.protocols.dao import ResourceNotFoundError  # noqa
+from hexkit.protocols.dao import DaoNaturalId
 
-"""Used to define the location of the main FastAPI app object."""
+from cm.core import models
 
-# flake8: noqa
-# pylint: skip-file
-
-
-from cm.config import Config
-from cm.main import get_rest_api
-
-app = get_rest_api(config=Config())
+# port described by a type alias:
+SampleDaoPort = DaoNaturalId[models.Sample]

@@ -12,22 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-#
-"""Helper functions related to covid test sample data
-that might get moved or replaced by something else."""
-from typing import Any
 
-from .models import PcrTest
+"""Entrypoint of the package"""
+import asyncio
+
+from cm.main import run_rest
 
 
-# 'Any' will be replaced with Dao or Type[Dao] again as soon as possible
-def help_find_sample(access_token: str, dao: Any) -> PcrTest:
-    """Find sample"""
-    return dao.find_one(mapping={"access_token": access_token})
+def run():
+    """run the rest API"""
+    asyncio.run(run_rest())
 
 
-def help_update_sample(dto: PcrTest, dao: Any) -> None:
-    """Update sample"""
-    # result = dao.update(mapping = {"access_token": access_token}, new_data)
-    dao.update(dto=dto)
+if __name__ == "__main__":
+    run()

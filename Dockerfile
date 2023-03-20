@@ -41,4 +41,4 @@ USER appuser
 # set environment
 ENV PYTHONUNBUFFERED=1
 
-ENTRYPOINT ["covid-microservice"]
+ENTRYPOINT ["cm"]

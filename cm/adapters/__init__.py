@@ -12,28 +12,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""Config Parameter Modeling and Parsing"""
-
-from ghga_service_chassis_lib.api import ApiConfigBase
-from ghga_service_chassis_lib.config import config_from_yaml
-from hexkit.providers.mongodb.provider import MongoDbConfig
-
-from .core.models import SupportedLanguages
-
-
-class SamplesDaoFactoryConfig(MongoDbConfig):
-    """Contains config for DAO Factory"""
-
-    collection_name = "samples"
-
-
-@config_from_yaml(prefix="covid_microservice")
-class Config(ApiConfigBase):
-    """Config parameters and their defaults."""
-
-    service_name: str = "covid_microservice"
-    language: SupportedLanguages = "Croatian"
-
-
-CONFIG = Config()
+#

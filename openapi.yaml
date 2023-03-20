@@ -9,24 +9,59 @@ components:
           type: array
       title: HTTPValidationError
       type: object
-    NewSampleResponse:
-      description: Model to deliver access_token and sample_id after posting new sample
+    SampleAuthDetails:
+      description: Sample objects containing the plaintext access_token
       properties:
         access_token:
+          pattern: ^[a-zA-Z0-9]*$
           title: Access Token
+          type: string
+        access_token_hash:
+          format: binary
+          title: Access Token Hash
+          type: string
+        collection_date:
+          pattern: ^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$
+          title: Collection Date
+          type: string
+        patient_pseudonym:
+          maxLength: 63
+          minLength: 11
+          title: Patient Pseudonym
           type: string
         sample_id:
           title: Sample Id
-          type: integer
+          type: string
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SampleStatus'
+          default: pending
+        submitter_email:
+          format: email
+          title: Submitter Email
+          type: string
+        test_date:
+          default: ''
+          pattern: ^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$
+          title: Test Date
+          type: string
+        test_result:
+          allOf:
+          - $ref: '#/components/schemas/SampleTestResult'
+          default: inconclusive
       required:
-      - access_token
+      - patient_pseudonym
+      - submitter_email
+      - collection_date
       - sample_id
-      title: NewSampleResponse
+      - access_token_hash
+      - access_token
+      title: SampleAuthDetails
       type: object
-    NewSampleSubmission:
+    SampleCreation:
       description: 'Pydantic model to perform validation on new submission data.
 
-        This is separate from the PcrTest to prevent someone from submitting
+        This is separate from the Sample model to prevent someone from submitting
 
         their own access token.'
       properties:
@@ -47,45 +82,44 @@ components:
       - patient_pseudonym
       - submitter_email
       - collection_date
-      title: NewSampleSubmission
+      title: SampleCreation
       type: object
-    StatusEnum:
-      description: Enumeration for PcrTest status values
+    SampleStatus:
+      description: Enumeration for Sample status values
       enum:
       - pending
       - completed
       - failed
-      title: StatusEnum
+      title: SampleStatus
       type: string
-    TestResultEnum:
-      description: Enumeration for PcrTest test_result values
+    SampleTestResult:
+      description: Enumeration for Sample test_result values
       enum:
-      - ''
+      - inconclusive
       - positive
       - negative
-      title: TestResultEnum
+      title: SampleTestResult
       type: string
-    UpdatePcrTest:
-      description: Update DTO for PcrTest
+    SampleUpdate:
+      description: Update class for Sample
       properties:
-        access_token:
-          pattern: ^[a-zA-Z0-9]*$
-          title: Access Token
+        sample_id:
+          default: ''
+          title: Sample Id
           type: string
         status:
-          $ref: '#/components/schemas/StatusEnum'
+          $ref: '#/components/schemas/SampleStatus'
         test_date:
           pattern: \d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?
           title: Test Date
           type: string
         test_result:
-          $ref: '#/components/schemas/TestResultEnum'
+          $ref: '#/components/schemas/SampleTestResult'
       required:
-      - access_token
       - status
       - test_result
       - test_date
-      title: UpdatePcrTest
+      title: SampleUpdate
       type: object
     ValidationError:
       properties:
@@ -108,37 +142,24 @@ components:
       - type
       title: ValidationError
       type: object
+  securitySchemes:
+    HTTPBearer:
+      scheme: bearer
+      type: http
 info:
   title: FastAPI
   version: 0.1.0
 openapi: 3.0.2
 paths:
-  /:
-    get:
-      description: Greet the World
-      operationId: index__get
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: {}
-          description: Successful Response
-      summary: Greet the world
-  /sample:
+  /samples:
     patch:
-      description: "Update a test sample with new test results.\n\nArgs:\n    data\
-        \ (UpdatePcrTest): A data object containing the updated test results,\n  \
-        \  including status, test_result, and test_date.\n    mdao: A MongoDB DAO\
-        \ object for accessing the database.\n\nReturns:\n    None. Returns a 204\
-        \ No Content status code if the update was successful.\n\nRaises:\n    HTTPException:\
-        \ If the test sample with the matching access_token cannot be\n    found,\
-        \ raises a 404 Not Found error."
-      operationId: update_sample_sample_patch
+      description: Updates an existing sample
+      operationId: update_sample_samples_patch
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdatePcrTest'
+              $ref: '#/components/schemas/SampleUpdate'
         required: true
       responses:
         '204':
@@ -149,25 +170,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
           description: Validation Error
+      security:
+      - HTTPBearer: []
       summary: Update an existing sample's test results
     post:
-      description: "Upload a new sample.\n\nArgs:\n    data (NewSampleSubmission):\
-        \ The data for the new sample.\n    mdao: A MongoDB DAO object for accessing\
-        \ the database.\n\nReturns:\n    NewSampleResponse: The access token and sample\
-        \ ID for the new sample."
-      operationId: post_sample_sample_post
+      description: Posts a new sample to the database
+      operationId: samples_post_samples_post
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewSampleSubmission'
+              $ref: '#/components/schemas/SampleCreation'
         required: true
       responses:
         '201':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NewSampleResponse'
+                $ref: '#/components/schemas/SampleAuthDetails'
           description: Successful Response
         '422':
           content:
@@ -176,27 +196,23 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
           description: Validation Error
       summary: Upload a new sample
-  /sample/{access_token}:
+  /samples/{sample_id}:
     get:
-      description: "Retrieve information for a test sample matching the access token.\n\
-        \nArgs:\n    access_token (str): The access token for the sample.\n    mdao:\
-        \ A MongoDB DAO object for accessing the database.\n\nReturns:\n    dict:\
-        \ A dictionary containing the sample information.\n\nRaises:\n    HTTPException:\
-        \ If the specified resource was not found."
-      operationId: get_sample_sample__access_token__get
+      description: Retrieve information for a test sample matching the access token.
+      operationId: get_sample_samples__sample_id__get
       parameters:
       - in: path
-        name: access_token
+        name: sample_id
         required: true
         schema:
-          title: Access Token
+          title: Sample Id
           type: string
       responses:
         '200':
           content:
             application/json:
               schema:
-                title: Response Get Sample Sample  Access Token  Get
+                title: Response Get Sample Samples  Sample Id  Get
                 type: object
           description: Successful Response
         '422':
@@ -205,4 +221,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
           description: Validation Error
+      security:
+      - HTTPBearer: []
       summary: Retrieve a existing sample

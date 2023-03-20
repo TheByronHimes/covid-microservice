@@ -14,13 +14,19 @@
 # limitations under the License.
 #
 
-"""Used to define the location of the main FastAPI app object."""
 
-# flake8: noqa
-# pylint: skip-file
+""" Ancillary functions, topic agnostic """
+
+import secrets
+import string
 
 
-from cm.config import Config
-from cm.main import get_rest_api
+def random_string(num: int) -> str:
+    """Produce a string containing num random numbers and letters"""
+    chars = string.ascii_letters + string.digits
+    return "".join([secrets.choice(chars) for _ in range(num)])
 
-app = get_rest_api(config=Config())
+
+def make_access_token() -> str:
+    """Method to return an access token string"""
+    return random_string(16)
