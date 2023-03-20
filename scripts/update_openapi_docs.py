@@ -30,7 +30,7 @@ OPENAPI_YAML = REPO_ROOT_DIR / "openapi.yaml"
 
 
 class ValidationError(RuntimeError):
-    """Raised when validation of openapi documentation fails."""
+    """Raised when validation of openapi documentation failes."""
 
 
 def get_openapi_spec() -> str:

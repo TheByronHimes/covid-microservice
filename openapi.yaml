@@ -42,7 +42,7 @@ components:
           type: string
         test_date:
           default: ''
-          pattern: ^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$
+          pattern: ^(\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?)?$
           title: Test Date
           type: string
         test_result:
