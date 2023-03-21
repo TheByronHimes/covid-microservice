@@ -20,15 +20,23 @@ from cm.core.authorizer import AuthorizerInterface
 from cm.core.utils import random_string
 from cm.ports.inbound.data_repository import DataRepositoryPort
 from cm.ports.outbound.dao import ResourceNotFoundError, SampleDaoPort
+from cm.ports.outbound.event_pub import EventPublisherPort
 
 
 class DataRepository(DataRepositoryPort):
     """Data repository implementation for sample object interaction"""
 
-    def __init__(self, *, sample_dao: SampleDaoPort, authorizer: AuthorizerInterface):
+    def __init__(
+        self,
+        *,
+        sample_dao: SampleDaoPort,
+        authorizer: AuthorizerInterface,
+        event_publisher: EventPublisherPort
+    ):
         """Initialize with the sample_dao object."""
         self._sample_dao = sample_dao
         self._authorizer = authorizer
+        self._event_publisher = event_publisher
 
     async def retrieve_sample(
         self, *, sample_id: str, access_token: str

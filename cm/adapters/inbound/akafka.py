@@ -18,8 +18,6 @@ from hexkit.custom_types import Ascii, JsonObject
 from hexkit.protocols.eventsub import EventSubscriberProtocol
 from pydantic import BaseSettings, Field
 
-from cm.ports.inbound.notifier import NotifierPort
-
 
 class EventSubTranslatorConfig(BaseSettings):
     """Config for consuming sample-update events"""
@@ -40,13 +38,12 @@ class EventSubTranslatorConfig(BaseSettings):
 class EventSubTranslator(EventSubscriberProtocol):
     """A translator for the EventSubscriberProtocol"""
 
-    def __init__(self, config: EventSubTranslatorConfig, notifier: NotifierPort):
+    def __init__(self, config: EventSubTranslatorConfig):
         """Initialize with config anb notifier dep"""
 
         self.topics_of_interest = [config.sample_updated_event_topic]
         self.types_of_interest = [config.sample_updated_event_type]
 
-        self._notifier = notifier
         self._config = config
 
     async def _consume_validated(
