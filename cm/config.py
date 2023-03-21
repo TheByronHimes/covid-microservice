@@ -17,8 +17,11 @@
 
 from ghga_service_chassis_lib.api import ApiConfigBase
 from ghga_service_chassis_lib.config import config_from_yaml
+from hexkit.providers.akafka import KafkaConfig
 from hexkit.providers.mongodb.provider import MongoDbConfig
-from pydantic import SecretStr
+
+from cm.adapters.inbound.akafka import EventSubTranslatorConfig
+from cm.adapters.outbound.akafka import EventPubTranslatorConfig
 
 
 class SamplesDaoFactoryConfig(MongoDbConfig):
@@ -28,12 +31,13 @@ class SamplesDaoFactoryConfig(MongoDbConfig):
 
 
 @config_from_yaml(prefix="cm")
-class Config(ApiConfigBase):
+class Config(
+    ApiConfigBase,
+    MongoDbConfig,
+    KafkaConfig,
+    EventPubTranslatorConfig,
+    EventSubTranslatorConfig,
+):
     """Config parameters and their defaults."""
 
     service_name: str = "cm"
-    db_connection_str: SecretStr
-    db_name: str
-
-
-CONFIG = Config()

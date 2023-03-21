@@ -12,11 +12,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+"""
+Borrowed from upload-controller-service, slight tweaks.
+"""
 
-"""FastAPI dependencies (used with the `Depends` feature)"""
-from cm.config import CONFIG
+from typing import Protocol
 
 
-def get_config():
-    """Get runtime configuration."""
-    return CONFIG
+class EventPublisherPort(Protocol):
+    """An interface for an adapter that publishes events related to this service"""
+
+    async def publish_sample_updated(
+        self, *, submitter_email: str, sample_id: int
+    ) -> None:
+        """Publish event saying that the given sample was updated"""
