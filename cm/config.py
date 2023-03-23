@@ -31,7 +31,7 @@ class SamplesDaoFactoryConfig(MongoDbConfig):
 
 
 @config_from_yaml(prefix="cm")
-class Config(
+class Config(  # pylint: disable=too-many-ancestors
     ApiConfigBase,
     MongoDbConfig,
     KafkaConfig,
