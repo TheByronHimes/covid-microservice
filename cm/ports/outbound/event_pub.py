@@ -24,6 +24,7 @@ class EventPublisherPort(Protocol):
     """An interface for an adapter that publishes events related to this service"""
 
     async def publish_sample_updated(
-        self, *, submitter_email: str, sample_id: int
+        self, *, submitter_email: str, sample_id: str
     ) -> None:
         """Publish event saying that the given sample was updated"""
+        ...

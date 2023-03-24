@@ -14,9 +14,8 @@
 # limitations under the License.
 #
 
-"""Provides multiple fixtures in one spot.
-Note: Right now I'm only using the MongoDB and Kafka providers."""
-
+"""Provides multiple fixtures in one spot. """
+# pylint: disable=unused-import, redefined-outer-name
 
 import socket
 from dataclasses import dataclass
@@ -24,8 +23,11 @@ from typing import AsyncGenerator
 
 import httpx
 import pytest_asyncio
-from hexkit.providers.akafka.testutils import KafkaFixture, kafka_fixture  # noqa
-from hexkit.providers.mongodb.testutils import MongoDbFixture, mongodb_fixture  # noqa
+from hexkit.providers.akafka.testutils import KafkaFixture, kafka_fixture  # noqa: F401
+from hexkit.providers.mongodb.testutils import (  # noqa: F401
+    MongoDbFixture,
+    mongodb_fixture,
+)
 
 from cm.config import Config
 from cm.container import Container
@@ -53,8 +55,8 @@ class JointFixture:
 
 @pytest_asyncio.fixture
 async def joint_fixture(
-    mongodb_fixture: MongoDbFixture,  # noqa
-    kafka_fixture: KafkaFixture,  # noqa
+    mongodb_fixture: MongoDbFixture,  # noqa: F811
+    kafka_fixture: KafkaFixture,  # noqa: F811
 ) -> AsyncGenerator[JointFixture, None]:
     """A fixture that embeds all other fixtures for API-level integration testing"""
 

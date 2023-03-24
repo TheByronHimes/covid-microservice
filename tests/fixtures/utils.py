@@ -13,7 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Utils for Fixture handling"""
+"""Includes a Parametrizer class which can provide date and email
+string parameters for testing"""
 
 
 from pathlib import Path
@@ -33,7 +34,7 @@ class Parametrizer:
     @staticmethod
     def make_date_string_test_params() -> list:
         """Returns a list of valid and invalid pytest test parameters"""
-        parms = [
+        params = [
             (VALID_DATE_STRING),  # all okay
             ("2023-01-15T11:18Z"),  # okay, Z accepted
             ("2023-01-15T11:18z"),  # okay, little z accepted too
@@ -51,7 +52,7 @@ class Parametrizer:
             pytest.param("2023-01-15t11:18", marks=pytest.mark.xfail),  # little t bad
         ]
 
-        return parms
+        return params
 
     @staticmethod
     def make_email_string_test_params() -> list:

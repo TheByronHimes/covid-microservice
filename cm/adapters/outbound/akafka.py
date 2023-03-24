@@ -37,19 +37,20 @@ class EventPubTranslatorConfig(BaseSettings):
 
 
 class EventPubTranslator(EventPublisherPort):
-    """A translator"""
+    """A translator for event-publishing functionality"""
 
     def __init__(
         self, *, config: EventPubTranslatorConfig, provider: EventPublisherProtocol
     ) -> None:
-        """init descriptor"""
+        """Assign config and event-publishing provider"""
         self._config = config
         self._provider = provider
 
     async def publish_sample_updated(
-        self, *, submitter_email: str, sample_id: int
+        self, *, submitter_email: str, sample_id: str
     ) -> None:
-        """Publish an event saying that a sample was updated"""
+        """Publish an event saying that a sample was updated, include submitter
+        email and sample id"""
         event_payload = {"submitter_email": submitter_email, "sample_id": sample_id}
         await self._provider.publish(
             payload=event_payload,

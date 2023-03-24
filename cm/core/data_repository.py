@@ -83,3 +83,7 @@ class DataRepository(DataRepositoryPort):
         sample.test_result = updates.test_result
         sample.test_date = updates.test_date
         await self._sample_dao.update(sample)
+
+        await self._event_publisher.publish_sample_updated(
+            submitter_email=sample.submitter_email, sample_id=sample.sample_id
+        )

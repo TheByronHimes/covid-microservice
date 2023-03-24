@@ -15,9 +15,11 @@
 #
 # pylint: disable=unused-import
 """DAO port"""
-from hexkit.protocols.dao import ResourceAlreadyExistsError  # noqa
-from hexkit.protocols.dao import ResourceNotFoundError  # noqa
-from hexkit.protocols.dao import DaoNaturalId
+from hexkit.protocols.dao import (  # noqa: F401
+    DaoNaturalId,
+    ResourceAlreadyExistsError,
+    ResourceNotFoundError,
+)
 
 from cm.core import models
 
