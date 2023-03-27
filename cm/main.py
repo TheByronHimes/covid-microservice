@@ -17,7 +17,7 @@
 from fastapi import FastAPI
 from ghga_service_chassis_lib.api import configure_app, run_server
 
-from cm.api.routes import sample_router
+from cm.adapters.inbound.fastapi_.routes import sample_router
 from cm.config import Config
 from cm.container import Container
 
@@ -49,6 +49,6 @@ async def run_rest():
     config = Config()
 
     async with get_configured_container(config=config) as container:
-        container.wire(modules=["cm.api.routes"])
+        container.wire(modules=["cm.adapters.inbound.fastapi_.routes"])
         api = get_rest_api(config=config)
         await run_server(app=api, config=config)

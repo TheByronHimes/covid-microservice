@@ -175,7 +175,7 @@ paths:
       summary: Update an existing sample's test results
     post:
       description: Posts a new sample to the database
-      operationId: samples_post_samples_post
+      operationId: post_sample_samples_post
       requestBody:
         content:
           application/json:

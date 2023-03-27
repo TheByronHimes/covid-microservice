@@ -15,9 +15,11 @@
 #
 """This is called a repository but it has nothing to do with the Repository Pattern.
 Basically, it houses all the domain logic."""
+import secrets
+import string
+
 from cm.core import models
 from cm.core.authorizer import AuthorizerInterface
-from cm.core.utils import random_string
 from cm.ports.inbound.data_repository import DataRepositoryPort
 from cm.ports.outbound.dao import ResourceNotFoundError, SampleDaoPort
 from cm.ports.outbound.event_pub import EventPublisherPort
@@ -37,6 +39,11 @@ class DataRepository(DataRepositoryPort):
         self._sample_dao = sample_dao
         self._authorizer = authorizer
         self._event_publisher = event_publisher
+
+    def _random_string(self, num):
+        """Produce a string containing num random numbers and letters"""
+        chars = string.ascii_letters + string.digits
+        return "".join([secrets.choice(chars) for _ in range(num)])
 
     async def retrieve_sample(
         self, *, sample_id: str, access_token: str
@@ -58,7 +65,7 @@ class DataRepository(DataRepositoryPort):
         access_token_hash = self._authorizer.hash_token(token=access_token)
         sample = models.Sample(
             **sample_creation.dict(),
-            sample_id=random_string(10),
+            sample_id=self._random_string(10),
             access_token_hash=access_token_hash
         )
         await self._sample_dao.insert(sample)
