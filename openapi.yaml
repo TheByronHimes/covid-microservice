@@ -1,37 +1,5 @@
 components:
   schemas:
-    Greeting:
-      description: A container storing a greeting for a specfic person incl. metadata
-      properties:
-        created_at:
-          description: The date/time when the message was created
-          format: date-time
-          title: Created At
-          type: string
-        isinformal:
-          description: Is the expression used in informal contexts?
-          title: Isinformal
-          type: boolean
-        language:
-          description: The language.
-          enum:
-          - Greek
-          - Croatian
-          - French
-          - German
-          title: Language
-          type: string
-        message:
-          description: The message content.
-          title: Message
-          type: string
-      required:
-      - message
-      - created_at
-      - language
-      - isinformal
-      title: Greeting
-      type: object
     HTTPValidationError:
       properties:
         detail:
@@ -40,6 +8,118 @@ components:
           title: Detail
           type: array
       title: HTTPValidationError
+      type: object
+    SampleAuthDetails:
+      description: Sample objects containing the plaintext access_token
+      properties:
+        access_token:
+          pattern: ^[a-zA-Z0-9]*$
+          title: Access Token
+          type: string
+        access_token_hash:
+          format: binary
+          title: Access Token Hash
+          type: string
+        collection_date:
+          pattern: ^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$
+          title: Collection Date
+          type: string
+        patient_pseudonym:
+          maxLength: 63
+          minLength: 11
+          title: Patient Pseudonym
+          type: string
+        sample_id:
+          title: Sample Id
+          type: string
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SampleStatus'
+          default: pending
+        submitter_email:
+          format: email
+          title: Submitter Email
+          type: string
+        test_date:
+          default: ''
+          pattern: ^(\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?)?$
+          title: Test Date
+          type: string
+        test_result:
+          allOf:
+          - $ref: '#/components/schemas/SampleTestResult'
+          default: inconclusive
+      required:
+      - patient_pseudonym
+      - submitter_email
+      - collection_date
+      - sample_id
+      - access_token_hash
+      - access_token
+      title: SampleAuthDetails
+      type: object
+    SampleCreation:
+      description: 'Pydantic model to perform validation on new submission data.
+
+        This is separate from the Sample model to prevent someone from submitting
+
+        their own access token.'
+      properties:
+        collection_date:
+          pattern: ^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$
+          title: Collection Date
+          type: string
+        patient_pseudonym:
+          maxLength: 63
+          minLength: 11
+          title: Patient Pseudonym
+          type: string
+        submitter_email:
+          format: email
+          title: Submitter Email
+          type: string
+      required:
+      - patient_pseudonym
+      - submitter_email
+      - collection_date
+      title: SampleCreation
+      type: object
+    SampleStatus:
+      description: Enumeration for Sample status values
+      enum:
+      - pending
+      - completed
+      - failed
+      title: SampleStatus
+      type: string
+    SampleTestResult:
+      description: Enumeration for Sample test_result values
+      enum:
+      - inconclusive
+      - positive
+      - negative
+      title: SampleTestResult
+      type: string
+    SampleUpdate:
+      description: Update class for Sample
+      properties:
+        sample_id:
+          default: ''
+          title: Sample Id
+          type: string
+        status:
+          $ref: '#/components/schemas/SampleStatus'
+        test_date:
+          pattern: \d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?
+          title: Test Date
+          type: string
+        test_result:
+          $ref: '#/components/schemas/SampleTestResult'
+      required:
+      - status
+      - test_result
+      - test_date
+      title: SampleUpdate
       type: object
     ValidationError:
       properties:
@@ -62,47 +142,27 @@ components:
       - type
       title: ValidationError
       type: object
+  securitySchemes:
+    HTTPBearer:
+      scheme: bearer
+      type: http
 info:
   title: FastAPI
   version: 0.1.0
 openapi: 3.0.2
 paths:
-  /:
-    get:
-      description: Greet the World
-      operationId: index__get
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: {}
-          description: Successful Response
-      summary: Greet the world
-  /greet/{name}:
-    get:
-      description: Greet a person by name. You may choose a formal or an informal
-        greeting.The language for the greeting is configured in the backend.
-      operationId: greet_greet__name__get
-      parameters:
-      - in: path
-        name: name
+  /samples:
+    patch:
+      description: Updates an existing sample
+      operationId: update_sample_samples_patch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SampleUpdate'
         required: true
-        schema:
-          title: Name
-          type: string
-      - in: query
-        name: isinformal
-        required: false
-        schema:
-          default: true
-          title: Isinformal
-          type: boolean
       responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Greeting'
+        '204':
           description: Successful Response
         '422':
           content:
@@ -110,4 +170,57 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
           description: Validation Error
-      summary: Greet a person
+      security:
+      - HTTPBearer: []
+      summary: Update an existing sample's test results
+    post:
+      description: Posts a new sample to the database
+      operationId: post_sample_samples_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SampleCreation'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SampleAuthDetails'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Upload a new sample
+  /samples/{sample_id}:
+    get:
+      description: Retrieve information for a test sample matching the access token.
+      operationId: get_sample_samples__sample_id__get
+      parameters:
+      - in: path
+        name: sample_id
+        required: true
+        schema:
+          title: Sample Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                title: Response Get Sample Samples  Sample Id  Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Retrieve a existing sample

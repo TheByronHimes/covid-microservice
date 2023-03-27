@@ -13,9 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Test dummy."""
+"""Entrypoint of the package"""
+import asyncio
+
+from cm.main import run_rest
 
 
-def test_dummy():
-    """Just makes the CI pass."""
-    assert True
+def run():
+    """run the rest API"""
+    asyncio.run(run_rest())
+
+
+if __name__ == "__main__":
+    run()

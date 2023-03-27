@@ -12,15 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
-"""Used to define the location of the main FastAPI app object."""
+"""Redo of initial technical challenge (COVID-19 Data Portal) by Byron Himes"""
 
-# flake8: noqa
-# pylint: skip-file
-
-
-from cm.config import Config
-from cm.main import get_rest_api
-
-app = get_rest_api(config=Config())
+__version__ = "0.1.0"

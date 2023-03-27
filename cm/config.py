@@ -12,15 +12,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
-"""Used to define the location of the main FastAPI app object."""
+"""Config Parameter Modeling and Parsing"""
 
-# flake8: noqa
-# pylint: skip-file
+from ghga_service_chassis_lib.api import ApiConfigBase
+from ghga_service_chassis_lib.config import config_from_yaml
+from hexkit.providers.mongodb.provider import MongoDbConfig
+from pydantic import SecretStr
 
 
-from cm.config import Config
-from cm.main import get_rest_api
+class SamplesDaoFactoryConfig(MongoDbConfig):
+    """Contains config for DAO Factory"""
 
-app = get_rest_api(config=Config())
+    collection_name = "samples"
+
+
+@config_from_yaml(prefix="cm")
+class Config(ApiConfigBase):
+    """Config parameters and their defaults."""
+
+    service_name: str = "cm"
+    db_connection_str: SecretStr
+    db_name: str
+
+
+CONFIG = Config()

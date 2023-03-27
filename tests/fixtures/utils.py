@@ -15,6 +15,61 @@
 
 """Utils for Fixture handling"""
 
+
 from pathlib import Path
 
+import pytest
+
 BASE_DIR = Path(__file__).parent.resolve()
+
+VALID_EMAIL = "test@test.com"
+VALID_DATE_STRING = "2023-01-15T11:18"
+VALID_NAME = "Jonathan K."
+
+
+class Parametrizer:
+    """Hosts static methods to assist in test creation."""
+
+    @staticmethod
+    def make_date_string_test_params() -> list:
+        """Returns a list of valid and invalid pytest test parameters"""
+        parms = [
+            (VALID_DATE_STRING),  # all okay
+            ("2023-01-15T11:18Z"),  # okay, Z accepted
+            ("2023-01-15T11:18z"),  # okay, little z accepted too
+            pytest.param(
+                "2023-01-15T11:18.4", marks=pytest.mark.xfail
+            ),  # invalid, nothing sub-minute
+            pytest.param("22-01-15T11:18", marks=pytest.mark.xfail),  # invalid year
+            pytest.param(
+                "2023-1-15T11:18", marks=pytest.mark.xfail
+            ),  # invalid month format
+            pytest.param(
+                "2023-01-5T11:18", marks=pytest.mark.xfail
+            ),  # invalid day format
+            pytest.param("2023-01-0511:18", marks=pytest.mark.xfail),  # no T
+            pytest.param("2023-01-15t11:18", marks=pytest.mark.xfail),  # little t bad
+        ]
+
+        return parms
+
+    @staticmethod
+    def make_email_string_test_params() -> list:
+        """Returns a list of valid and invalid pytest test parameters for emails"""
+        passes = [
+            (VALID_EMAIL),  # all okay
+        ]
+
+        fail_cases = [
+            "test.com",
+            "test@test@test.com",
+            "testtesttesttesttesttesttesttesttesttesttesttest\
+            testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttest\
+            testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttest\
+            testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttest\
+            testtesttest@test.com",
+        ]
+
+        fails = [pytest.param(fail, marks=pytest.mark.xfail) for fail in fail_cases]
+
+        return passes + fails
