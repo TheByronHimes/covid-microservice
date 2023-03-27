@@ -95,7 +95,7 @@ async def get_sample(
     response_model=models.SampleAuthDetails,
 )
 @inject
-async def samples_post(
+async def post_sample(
     data: models.SampleCreation,
     data_repository: DataRepositoryPort = Depends(Provide[Container.data_repository]),
 ) -> models.SampleAuthDetails:

@@ -19,7 +19,6 @@ import pytest
 from pydantic import EmailStr
 
 from cm.core import models
-from cm.core.utils import random_string
 
 from .fixtures.utils import VALID_DATE_STRING, VALID_EMAIL, VALID_NAME, Parametrizer
 
@@ -29,7 +28,7 @@ from .fixtures.utils import VALID_DATE_STRING, VALID_EMAIL, VALID_NAME, Parametr
     [
         (VALID_NAME),  # all okay
         pytest.param("Jonathan K", marks=pytest.mark.xfail),  # name too short
-        pytest.param(random_string(64), marks=pytest.mark.xfail),  # name too long
+        pytest.param("a" * 64, marks=pytest.mark.xfail),  # name too long
     ],
 )
 def test_sample_creation_names(patient_pseudonym):
