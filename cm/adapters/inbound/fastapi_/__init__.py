@@ -13,6 +13,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-db_connection_str: "mongodb://mongodb:27017"
-db_name: "dev_db"

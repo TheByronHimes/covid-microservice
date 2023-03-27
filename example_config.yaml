@@ -8,13 +8,8 @@ db_connection_str: '**********'
 db_name: dev_db
 docs_url: /docs
 host: 127.0.0.1
-kafka_servers:
-- kafka:9092
 log_level: info
 openapi_url: /openapi.json
 port: 8080
-sample_updated_event_topic: sample_events
-sample_updated_event_type: sample_updated
-service_instance_id: '1'
 service_name: cm
 workers: 1
