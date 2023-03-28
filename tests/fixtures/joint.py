@@ -65,7 +65,7 @@ async def joint_fixture(
 
     # create a DI container instance:translators
     async with get_configured_container(config=config) as container:
-        container.wire(modules=["cm.api.routes"])
+        container.wire(modules=["cm.adapters.inbound.fastapi_.routes"])
 
         # setup an API test client:
         api = get_rest_api(config=config)
