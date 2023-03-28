@@ -18,6 +18,7 @@
 from hexkit.protocols.eventpub import EventPublisherProtocol
 from pydantic import BaseSettings, Field
 
+from cm.core import models
 from cm.ports.outbound.event_pub import EventPublisherPort
 
 
@@ -47,14 +48,13 @@ class EventPubTranslator(EventPublisherPort):
         self._provider = provider
 
     async def publish_sample_updated(
-        self, *, submitter_email: str, sample_id: str
+        self, *, sample_no_auth: models.SampleNoAuth
     ) -> None:
         """Publish an event saying that a sample was updated, include submitter
         email and sample id"""
-        event_payload = {"submitter_email": submitter_email, "sample_id": sample_id}
         await self._provider.publish(
-            payload=event_payload,
+            payload=sample_no_auth.dict(),
             type_=self._config.sample_updated_event_type,
             topic=self._config.sample_updated_event_topic,
-            key=str(sample_id) + submitter_email,
+            key=sample_no_auth.sample_id,
         )

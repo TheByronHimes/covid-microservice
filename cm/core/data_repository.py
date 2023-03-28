@@ -91,6 +91,7 @@ class DataRepository(DataRepositoryPort):
         sample.test_date = updates.test_date
         await self._sample_dao.update(sample)
 
+        sample_no_auth = models.SampleNoAuth(**sample.dict())
         await self._event_publisher.publish_sample_updated(
-            submitter_email=sample.submitter_email, sample_id=sample.sample_id
+            sample_no_auth=sample_no_auth
         )

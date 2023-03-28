@@ -16,7 +16,7 @@
 """Tests the typical path(s) of user interaction, following an upload-update-query
 sequence of events."""
 import pytest
-from hexkit.providers.akafka.testutils import kafka_fixture  # noqa: F401
+from hexkit.providers.akafka.testutils import ExpectedEvent, kafka_fixture  # noqa: F401
 from hexkit.providers.mongodb.testutils import mongodb_fixture  # noqa: F401
 
 from cm.core import models
@@ -58,6 +58,7 @@ async def test_full_journey(joint_fixture: JointFixture):  # noqa: F811
         "test_result",
         "test_date",
         "access_token",
+        "access_token_hash",
         "sample_id",
     ]:
         assert field_name in body
@@ -75,25 +76,22 @@ async def test_full_journey(joint_fixture: JointFixture):  # noqa: F811
 
     headers = {"Authorization": "Bearer " + access_token}
 
-    async with joint_fixture.kafka.record_events(
-        in_topic=joint_fixture.config.sample_updated_event_topic
-    ) as recorder:
-        response_from_patch = await joint_fixture.rest_client.patch(
+    expected_payload = models.SampleNoAuth(**sample, **sample_update).dict()
+
+    expected_events = [
+        ExpectedEvent(
+            payload=expected_payload,
+            type_=joint_fixture.config.sample_updated_event_type,
+            key=sample_id,
+        )
+    ]
+
+    async with joint_fixture.kafka.expect_events(
+        events=expected_events, in_topic=joint_fixture.config.sample_updated_event_topic
+    ):
+        await joint_fixture.rest_client.patch(
             url="/samples", json=sample_update, headers=headers
         )
-
-    # verify that an event was published correctly
-    assert len(recorder.recorded_events) == 1
-    assert (
-        recorder.recorded_events[0].type_
-        == joint_fixture.config.sample_updated_event_type
-    )
-    payload = recorder.recorded_events[0].payload
-    assert payload.keys() == {"sample_id", "submitter_email"}
-    assert payload["sample_id"] == sample_id
-    assert payload["submitter_email"] == "byro93@live.com"
-
-    assert response_from_patch.status_code == 204
 
     # Try to retrieve updated sample, verify results
     response_from_get = await joint_fixture.rest_client.get(

@@ -14,17 +14,19 @@
 # limitations under the License.
 #
 """
-Borrowed from upload-controller-service, slight tweaks.
+Contains definition for the outbound port for event publishing
 """
 
 from typing import Protocol
+
+from cm.core import models
 
 
 class EventPublisherPort(Protocol):
     """An interface for an adapter that publishes events related to this service"""
 
     async def publish_sample_updated(
-        self, *, submitter_email: str, sample_id: str
+        self, *, sample_no_auth: models.SampleNoAuth
     ) -> None:
-        """Publish event saying that the given sample was updated"""
+        """Publish an event with the updated Sample info"""
         ...

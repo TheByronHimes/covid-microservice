@@ -81,3 +81,9 @@ class SampleUpdate(BaseModel):
     test_result: SampleTestResult
     # the regex is slightly different: The date is considered mandatory here
     test_date: str = Field(..., regex=r"\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?")
+
+
+class SampleNoAuth(SampleCreation, SampleUpdate):
+    """A class containing all of the sample information without the auth values"""
+
+    ...
