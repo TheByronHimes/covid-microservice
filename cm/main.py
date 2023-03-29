@@ -52,3 +52,12 @@ async def run_rest():
         container.wire(modules=["cm.adapters.inbound.fastapi_.routes"])
         api = get_rest_api(config=config)
         await run_server(app=api, config=config)
+
+
+async def consume_events(run_forever: bool = True):
+    """Start consuming events with kafka"""
+    config = Config()
+
+    async with get_configured_container(config=config) as container:
+        event_consumer = await container.kafka_event_subscriber()
+        await event_consumer.run(forever=run_forever)
