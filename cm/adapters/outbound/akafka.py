@@ -50,8 +50,7 @@ class EventPubTranslator(EventPublisherPort):
     async def publish_sample_updated(
         self, *, sample_no_auth: models.SampleNoAuth
     ) -> None:
-        """Publish an event saying that a sample was updated, include submitter
-        email and sample id"""
+        """Publish an event saying that a sample was updated"""
         await self._provider.publish(
             payload=sample_no_auth.dict(),
             type_=self._config.sample_updated_event_type,
