@@ -13,15 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# pylint: disable=unused-import
-"""DAO port"""
-from hexkit.protocols.dao import (  # noqa: F401
-    DaoNaturalId,
-    ResourceAlreadyExistsError,
-    ResourceNotFoundError,
-)
+"""
+Contains definition for the outbound port for event publishing
+"""
+
+from typing import Protocol
 
 from cm.core import models
 
-# port described by a type alias:
-SampleDaoPort = DaoNaturalId[models.Sample]
+
+class EventPublisherPort(Protocol):
+    """An interface for an adapter that publishes events related to this service"""
+
+    async def publish_sample_updated(
+        self, *, sample_no_auth: models.SampleNoAuth
+    ) -> None:
+        """Publish an event with the updated Sample info"""
+        ...

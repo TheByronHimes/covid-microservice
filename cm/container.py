@@ -15,8 +15,10 @@
 #
 """Dependency-Injection container"""
 from hexkit.inject import ContainerBase, get_configurator, get_constructor
+from hexkit.providers.akafka.provider import KafkaEventPublisher
 from hexkit.providers.mongodb import MongoDbDaoFactory
 
+from cm.adapters.outbound.akafka import EventPubTranslator
 from cm.adapters.outbound.dao import SampleDaoConstructor
 from cm.config import Config
 from cm.core.authorizer import Authorizer
@@ -30,11 +32,18 @@ class Container(ContainerBase):
 
     # outbound providers
     dao_factory = get_constructor(MongoDbDaoFactory, config=config)
+    kafka_event_publisher = get_constructor(KafkaEventPublisher, config=config)
 
     # outbound translators
     sample_dao = get_constructor(SampleDaoConstructor, dao_factory=dao_factory)
+    event_publisher = get_constructor(
+        EventPubTranslator, config=config, provider=kafka_event_publisher
+    )
 
     # domain/core components:
     data_repository = get_constructor(
-        DataRepository, sample_dao=sample_dao, authorizer=Authorizer()
+        DataRepository,
+        sample_dao=sample_dao,
+        authorizer=Authorizer(),
+        event_publisher=event_publisher,
     )

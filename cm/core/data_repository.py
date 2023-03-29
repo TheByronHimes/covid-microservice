@@ -22,15 +22,23 @@ from cm.core import models
 from cm.core.authorizer import AuthorizerInterface
 from cm.ports.inbound.data_repository import DataRepositoryPort
 from cm.ports.outbound.dao import ResourceNotFoundError, SampleDaoPort
+from cm.ports.outbound.event_pub import EventPublisherPort
 
 
 class DataRepository(DataRepositoryPort):
     """Data repository implementation for sample object interaction"""
 
-    def __init__(self, *, sample_dao: SampleDaoPort, authorizer: AuthorizerInterface):
+    def __init__(
+        self,
+        *,
+        sample_dao: SampleDaoPort,
+        authorizer: AuthorizerInterface,
+        event_publisher: EventPublisherPort
+    ):
         """Initialize with the sample_dao object."""
         self._sample_dao = sample_dao
         self._authorizer = authorizer
+        self._event_publisher = event_publisher
 
     def _random_string(self, num):
         """Produce a string containing num random numbers and letters"""
@@ -82,3 +90,8 @@ class DataRepository(DataRepositoryPort):
         sample.test_result = updates.test_result
         sample.test_date = updates.test_date
         await self._sample_dao.update(sample)
+
+        sample_no_auth = models.SampleNoAuth(**sample.dict())
+        await self._event_publisher.publish_sample_updated(
+            sample_no_auth=sample_no_auth
+        )
