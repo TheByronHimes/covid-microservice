@@ -31,11 +31,11 @@ class AuthorizerInterface(ABC):
         """Produce a string containing "length" random numbers and letters"""
 
     @abstractmethod
-    def hash_token(self, *, token: str) -> bytes:
+    def hash_token(self, *, token: str) -> str:
         """Returns a hashed token for storage in the database"""
 
     @abstractmethod
-    def check_token(self, *, token_plain: str, token_hashed: bytes) -> bool:
+    def check_token(self, *, token_plain: str, token_hashed: str) -> bool:
         """Compares a plaintext and hashed token to see if they are equivalent"""
 
 
@@ -47,10 +47,12 @@ class Authorizer(AuthorizerInterface):
         chars = string.ascii_letters + string.digits
         return "".join([secrets.choice(chars) for _ in range(length)])
 
-    def hash_token(self, *, token: str) -> bytes:
+    def hash_token(self, *, token: str) -> str:
         token_bytes = bytes(token, encoding="utf-8")
-        return bcrypt.hashpw(token_bytes, bcrypt.gensalt())
+        hash_bytes = bcrypt.hashpw(token_bytes, bcrypt.gensalt())
+        return str(hash_bytes, encoding="utf-8")
 
-    def check_token(self, *, token_plain: str, token_hashed: bytes) -> bool:
+    def check_token(self, *, token_plain: str, token_hashed: str) -> bool:
         token_plain_bytes = bytes(token_plain, encoding="utf-8")
-        return bcrypt.checkpw(token_plain_bytes, token_hashed)
+        token_hashed_bytes = bytes(token_hashed, encoding="utf-8")
+        return bcrypt.checkpw(token_plain_bytes, token_hashed_bytes)

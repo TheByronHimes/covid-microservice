@@ -17,7 +17,6 @@ components:
           title: Access Token
           type: string
         access_token_hash:
-          format: binary
           title: Access Token Hash
           type: string
         collection_date:

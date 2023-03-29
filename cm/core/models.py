@@ -64,7 +64,7 @@ class Sample(SampleFullCreation):
     """SampleFullCreation plus a hashed access token for authorizing access, and an ID"""
 
     sample_id: str
-    access_token_hash: bytes
+    access_token_hash: str
 
 
 class SampleAuthDetails(Sample):
