@@ -24,7 +24,7 @@ import pytest
 BASE_DIR = Path(__file__).parent.resolve()
 
 VALID_EMAIL = "test@test.com"
-VALID_DATE_STRING = "2023-01-15T11:18"
+VALID_DATE_STRING = "2023-01-15T11:18+02:00"
 VALID_NAME = "Jonathan K."
 
 
@@ -36,11 +36,13 @@ class Parametrizer:
         """Returns a list of valid and invalid pytest test parameters"""
         params = [
             (VALID_DATE_STRING),  # all okay
-            ("2023-01-15T11:18Z"),  # okay, Z accepted
-            ("2023-01-15T11:18z"),  # okay, little z accepted too
+            ("2023-01-15T11:18:10Z"),
+            ("2023-01-15T11:18:10.512Z"),
+            ("2023-01-15T11:18Z"),
             pytest.param(
-                "2023-01-15T11:18.4", marks=pytest.mark.xfail
-            ),  # invalid, nothing sub-minute
+                "2023-01-15T11:18z", marks=pytest.mark.xfail
+            ),  # little z NOT accepted
+            pytest.param("2023-01-15T11:18.4", marks=pytest.mark.xfail),
             pytest.param("22-01-15T11:18", marks=pytest.mark.xfail),  # invalid year
             pytest.param(
                 "2023-1-15T11:18", marks=pytest.mark.xfail

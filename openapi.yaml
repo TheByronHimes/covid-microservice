@@ -20,7 +20,7 @@ components:
           title: Access Token Hash
           type: string
         collection_date:
-          pattern: ^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$
+          format: date-time
           title: Collection Date
           type: string
         patient_pseudonym:
@@ -40,8 +40,9 @@ components:
           title: Submitter Email
           type: string
         test_date:
-          default: ''
-          pattern: ^(\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?)?$
+          default: '2023-03-30T09:37:11.579343+00:00'
+          description: The date the test was completed.
+          format: date-time
           title: Test Date
           type: string
         test_result:
@@ -65,7 +66,7 @@ components:
         their own access token.'
       properties:
         collection_date:
-          pattern: ^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$
+          format: date-time
           title: Collection Date
           type: string
         patient_pseudonym:
@@ -109,7 +110,9 @@ components:
         status:
           $ref: '#/components/schemas/SampleStatus'
         test_date:
-          pattern: \d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?
+          default: '2023-03-30T09:37:11.583435+00:00'
+          description: The date the test was completed.
+          format: date-time
           title: Test Date
           type: string
         test_result:
@@ -117,7 +120,6 @@ components:
       required:
       - status
       - test_result
-      - test_date
       title: SampleUpdate
       type: object
     ValidationError:

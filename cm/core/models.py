@@ -17,6 +17,7 @@
 
 from enum import Enum
 
+from ghga_service_chassis_lib.utils import DateTimeUTC, now_as_utc
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -44,7 +45,7 @@ class SampleCreation(BaseModel):
 
     patient_pseudonym: str = Field(..., min_length=11, max_length=63)
     submitter_email: EmailStr
-    collection_date: str = Field(..., regex=r"^\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?$")
+    collection_date: DateTimeUTC
 
 
 class SampleFullCreation(SampleCreation):
@@ -52,7 +53,9 @@ class SampleFullCreation(SampleCreation):
 
     status: SampleStatus = SampleStatus.PENDING
     test_result: SampleTestResult = SampleTestResult.INCONCLUSIVE
-    test_date: str = Field(default="", regex=r"^(\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?)?$")
+    test_date: DateTimeUTC = Field(
+        default=now_as_utc(), description="The date the test was completed."
+    )
 
     class Config:
         """Fields not required, so force validation on assignment"""
@@ -79,8 +82,9 @@ class SampleUpdate(BaseModel):
     sample_id: str = ""
     status: SampleStatus
     test_result: SampleTestResult
-    # the regex is slightly different: The date is considered mandatory here
-    test_date: str = Field(..., regex=r"\d{4}(-\d{2}){2}T\d{2}:\d{2}[zZ]?")
+    test_date: DateTimeUTC = Field(
+        default=now_as_utc(), description="The date the test was completed."
+    )
 
 
 class SampleNoAuth(SampleCreation, SampleUpdate):
