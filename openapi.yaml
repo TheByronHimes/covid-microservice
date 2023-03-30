@@ -40,7 +40,7 @@ components:
           title: Submitter Email
           type: string
         test_date:
-          default: '2023-03-30T09:37:11.579343+00:00'
+          default: 9999-12-31T11:59Z
           description: The date the test was completed.
           format: date-time
           title: Test Date
@@ -110,7 +110,7 @@ components:
         status:
           $ref: '#/components/schemas/SampleStatus'
         test_date:
-          default: '2023-03-30T09:37:11.583435+00:00'
+          default: 9999-12-31T11:59Z
           description: The date the test was completed.
           format: date-time
           title: Test Date

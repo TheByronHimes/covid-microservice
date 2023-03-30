@@ -17,7 +17,7 @@
 
 from enum import Enum
 
-from ghga_service_chassis_lib.utils import DateTimeUTC, now_as_utc
+from ghga_service_chassis_lib.utils import DateTimeUTC
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -54,7 +54,7 @@ class SampleFullCreation(SampleCreation):
     status: SampleStatus = SampleStatus.PENDING
     test_result: SampleTestResult = SampleTestResult.INCONCLUSIVE
     test_date: DateTimeUTC = Field(
-        default=now_as_utc(), description="The date the test was completed."
+        default="9999-12-31T11:59Z", description="The date the test was completed."
     )
 
     class Config:
@@ -83,7 +83,7 @@ class SampleUpdate(BaseModel):
     status: SampleStatus
     test_result: SampleTestResult
     test_date: DateTimeUTC = Field(
-        default=now_as_utc(), description="The date the test was completed."
+        default="9999-12-31T11:59Z", description="The date the test was completed."
     )
 
 
