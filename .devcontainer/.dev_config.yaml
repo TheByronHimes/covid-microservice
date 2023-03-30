@@ -18,5 +18,7 @@ db_connection_str: "mongodb://mongodb:27017"
 db_name: "dev_db"
 sample_updated_event_topic: sample_events
 sample_updated_event_type: sample_updated
+update_sample_event_topic: sample_events
+update_sample_event_type: update_sample
 service_instance_id: 001
 kafka_servers: ["kafka:9092"]

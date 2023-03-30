@@ -21,6 +21,24 @@
       ],
       "type": "string"
     },
+    "update_sample_event_topic": {
+      "title": "Update Sample Event Topic",
+      "description": "Name of the event topic that tracks sample events",
+      "example": "sample_events",
+      "env_names": [
+        "cm_update_sample_event_topic"
+      ],
+      "type": "string"
+    },
+    "update_sample_event_type": {
+      "title": "Update Sample Event Type",
+      "description": "The type label for events containing update-op data for samples",
+      "example": "update_sample",
+      "env_names": [
+        "cm_update_sample_event_type"
+      ],
+      "type": "string"
+    },
     "service_name": {
       "title": "Service Name",
       "default": "cm",
@@ -209,6 +227,8 @@
   "required": [
     "sample_updated_event_topic",
     "sample_updated_event_type",
+    "update_sample_event_topic",
+    "update_sample_event_type",
     "service_instance_id",
     "kafka_servers",
     "db_connection_str",

@@ -41,21 +41,20 @@ class Container(ContainerBase):
         EventPubTranslator, config=config, provider=kafka_event_publisher
     )
 
-    # inbound translators
-    event_sub_translator = get_constructor(
-        EventSubTranslator,
-        config=config,
-    )
-
-    # inbound providers
-    kafka_event_subscriber = get_constructor(
-        KafkaEventSubscriber, config=config, translator=event_sub_translator
-    )
-
     # domain/core components:
     data_repository = get_constructor(
         DataRepository,
         sample_dao=sample_dao,
         authorizer=Authorizer(),
         event_publisher=event_publisher,
+    )
+
+    # inbound translators
+    event_sub_translator = get_constructor(
+        EventSubTranslator, config=config, data_repository=data_repository
+    )
+
+    # inbound providers
+    kafka_event_subscriber = get_constructor(
+        KafkaEventSubscriber, config=config, translator=event_sub_translator
     )

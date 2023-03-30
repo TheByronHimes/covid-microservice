@@ -111,6 +111,9 @@ async def test_full_journey(joint_fixture: JointFixture, parms):  # noqa: F811
             url="/samples", json=sample_update, headers=headers
         )
 
+    event_subscriber = await joint_fixture.container.kafka_event_subscriber()
+    await event_subscriber.run(forever=False)  # handle first sample_updated event
+
     # Try to retrieve updated sample, verify results
     response_from_get = await joint_fixture.rest_client.get(
         url=f"/samples/{sample_id}", headers=headers
@@ -129,3 +132,33 @@ async def test_full_journey(joint_fixture: JointFixture, parms):  # noqa: F811
     assert DateTimeUTC.fromisoformat(
         body_from_get["test_date"]
     ) == DateTimeUTC.fromisoformat(parms["test_date"])
+
+    # Update sample via published event
+    update_event = {
+        "sample_id": sample_id,
+        "status": models.SampleStatus.COMPLETED,
+        "test_result": models.SampleTestResult.POSITIVE,
+        "test_date": "2023-02-03T14:15-07:00",
+    }
+
+    await joint_fixture.kafka.publish_event(
+        payload=update_event,
+        type_=joint_fixture.config.update_sample_event_type,
+        topic=joint_fixture.config.update_sample_event_topic,
+        key=sample_id,
+    )
+
+    # consume update_sample event, which should trigger the update
+    await event_subscriber.run(forever=False)
+
+    # Verify that the update was applied, and only check the fields we updated
+    response_from_get2 = await joint_fixture.rest_client.get(
+        url=f"/samples/{sample_id}", headers=headers
+    )
+    body_from_get = response_from_get2.json()
+    assert body_from_get["sample_id"] == sample_id
+    assert body_from_get["status"] == update_event["status"]
+    assert body_from_get["test_result"] == update_event["test_result"]
+    assert DateTimeUTC.fromisoformat(
+        body_from_get["test_date"]
+    ) == DateTimeUTC.fromisoformat(update_event["test_date"])

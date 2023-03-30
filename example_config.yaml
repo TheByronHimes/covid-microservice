@@ -17,4 +17,6 @@ sample_updated_event_topic: sample_events
 sample_updated_event_type: sample_updated
 service_instance_id: '1'
 service_name: cm
+update_sample_event_topic: sample_events
+update_sample_event_type: update_sample
 workers: 1

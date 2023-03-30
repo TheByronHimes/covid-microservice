@@ -75,17 +75,23 @@ class DataRepository(DataRepositoryPort):
         return sample_auth_details
 
     async def update_sample(
-        self, *, updates: models.SampleUpdate, access_token: str
+        self,
+        *,
+        updates: models.SampleUpdate,
+        access_token: str = "",
+        is_external: bool = True
     ) -> None:
         try:
             sample = await self._sample_dao.get_by_id(updates.sample_id)
         except ResourceNotFoundError as err:
             raise self.SampleNotFoundError(sample_id=updates.sample_id) from err
 
-        if not self._authorizer.check_token(
-            token_plain=access_token, token_hashed=sample.access_token_hash
-        ):
-            raise self.UnauthorizedRequestError(sample_id=updates.sample_id)
+        if is_external:
+            if not self._authorizer.check_token(
+                token_plain=access_token, token_hashed=sample.access_token_hash
+            ):
+                raise self.UnauthorizedRequestError(sample_id=updates.sample_id)
+
         sample.status = updates.status
         sample.test_result = updates.test_result
         sample.test_date = updates.test_date
