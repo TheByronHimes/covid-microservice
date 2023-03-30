@@ -16,12 +16,15 @@
 """Entrypoint of the package"""
 import asyncio
 
-from cm.main import run_rest
+from cm.main import consume_events, run_rest
 
 
 def run():
     """run the rest API"""
-    asyncio.run(run_rest())
+    loop = asyncio.get_event_loop()
+    task_api = loop.create_task(run_rest())
+    task_consume = loop.create_task(consume_events())
+    loop.run_until_complete(asyncio.gather(task_api, task_consume))
 
 
 if __name__ == "__main__":
