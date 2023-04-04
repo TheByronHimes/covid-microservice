@@ -26,17 +26,6 @@ from cm.ports.inbound.data_repository import DataRepositoryPort
 class EventSubTranslatorConfig(BaseSettings):
     """Config for the event subscriber"""
 
-    sample_updated_event_topic: str = Field(
-        ...,
-        description="Name of the event topic used to track sample events",
-        example="sample_events",
-    )
-    sample_updated_event_type: str = Field(
-        ...,
-        description="The type to use for event that inform about sample updates.",
-        example="sample_updated",
-    )
-
     update_sample_event_topic: str = Field(
         ...,
         description="Name of the event topic that tracks sample events",
@@ -59,11 +48,9 @@ class EventSubTranslator(EventSubscriberProtocol):
         self._data_repository = data_repository
 
         self.topics_of_interest = [
-            config.sample_updated_event_topic,
             config.update_sample_event_topic,
         ]
         self.types_of_interest = [
-            config.sample_updated_event_type,
             config.update_sample_event_type,
         ]
 
@@ -78,13 +65,8 @@ class EventSubTranslator(EventSubscriberProtocol):
         self, *, payload: JsonObject, type_: Ascii, topic: Ascii
     ) -> None:
         """Consumes an event"""
-        if type_ == self._config.sample_updated_event_type:
-            pass
-        elif type_ == self._config.update_sample_event_type:
+        if type_ == self._config.update_sample_event_type:
             sample_updates = models.SampleUpdate(**payload)
             await self._update_sample(sample_updates=sample_updates)
         else:
             raise RuntimeError(f"Received unexpected event type: {type_}")
-
-        if topic != self._config.sample_updated_event_topic:
-            raise RuntimeError(f"Received unexpected topic: {topic}")

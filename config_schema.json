@@ -3,24 +3,6 @@
   "description": "Modifies the orginal Settings class provided by the user",
   "type": "object",
   "properties": {
-    "sample_updated_event_topic": {
-      "title": "Sample Updated Event Topic",
-      "description": "Name of the event topic used to track sample update events",
-      "example": "sample_updates",
-      "env_names": [
-        "cm_sample_updated_event_topic"
-      ],
-      "type": "string"
-    },
-    "sample_updated_event_type": {
-      "title": "Sample Updated Event Type",
-      "description": "The type to use for event that inform about sample updates.",
-      "example": "sample_updated",
-      "env_names": [
-        "cm_sample_updated_event_type"
-      ],
-      "type": "string"
-    },
     "update_sample_event_topic": {
       "title": "Update Sample Event Topic",
       "description": "Name of the event topic that tracks sample events",
@@ -36,6 +18,24 @@
       "example": "update_sample",
       "env_names": [
         "cm_update_sample_event_type"
+      ],
+      "type": "string"
+    },
+    "sample_updated_event_topic": {
+      "title": "Sample Updated Event Topic",
+      "description": "Name of the event topic used to track sample update events",
+      "example": "sample_updates",
+      "env_names": [
+        "cm_sample_updated_event_topic"
+      ],
+      "type": "string"
+    },
+    "sample_updated_event_type": {
+      "title": "Sample Updated Event Type",
+      "description": "The type to use for event that inform about sample updates.",
+      "example": "sample_updated",
+      "env_names": [
+        "cm_sample_updated_event_type"
       ],
       "type": "string"
     },
@@ -225,10 +225,10 @@
     }
   },
   "required": [
-    "sample_updated_event_topic",
-    "sample_updated_event_type",
     "update_sample_event_topic",
     "update_sample_event_type",
+    "sample_updated_event_topic",
+    "sample_updated_event_type",
     "service_instance_id",
     "kafka_servers",
     "db_connection_str",

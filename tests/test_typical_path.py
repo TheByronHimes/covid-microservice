@@ -111,8 +111,9 @@ async def test_full_journey(joint_fixture: JointFixture, parms):  # noqa: F811
             url="/samples", json=sample_update, headers=headers
         )
 
+    # consume event produced just now
     event_subscriber = await joint_fixture.container.kafka_event_subscriber()
-    await event_subscriber.run(forever=False)  # handle first sample_updated event
+    await event_subscriber.run(forever=False)
 
     # Try to retrieve updated sample, verify results
     response_from_get = await joint_fixture.rest_client.get(
