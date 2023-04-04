@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 """Kafka-based event publishing adapters and the exceptions they may throw."""
-from datetime import datetime
+import json
 
 from hexkit.protocols.eventpub import EventPublisherProtocol
 from pydantic import BaseSettings, Field
@@ -52,10 +52,7 @@ class EventPubTranslator(EventPublisherPort):
         self, *, sample_no_auth: models.SampleNoAuth
     ) -> None:
         """Publish an event saying that a sample was updated"""
-        payload = sample_no_auth.dict()
-        for key, value in payload.items():
-            if isinstance(value, datetime):
-                payload[key] = str(value)  # maintain ignorance of specific fields
+        payload = json.loads(sample_no_auth.json())
         await self._provider.publish(
             payload=payload,
             type_=self._config.sample_updated_event_type,

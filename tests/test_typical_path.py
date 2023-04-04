@@ -15,6 +15,8 @@
 #
 """Tests the typical path(s) of user interaction, following an upload-update-query
 sequence of events."""
+import json
+
 import pytest
 from ghga_service_chassis_lib.utils import DateTimeUTC
 from hexkit.providers.akafka.testutils import ExpectedEvent, kafka_fixture  # noqa: F401
@@ -91,9 +93,7 @@ async def test_full_journey(joint_fixture: JointFixture, parms):  # noqa: F811
 
     headers = {"Authorization": "Bearer " + access_token}
 
-    expected_payload = models.SampleNoAuth(**sample, **sample_update).dict()
-    expected_payload["collection_date"] = str(expected_payload["collection_date"])
-    expected_payload["test_date"] = str(expected_payload["test_date"])
+    expected_payload = json.loads(models.SampleNoAuth(**sample, **sample_update).json())
 
     expected_events = [
         ExpectedEvent(
