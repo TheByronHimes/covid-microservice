@@ -3,6 +3,24 @@
   "description": "Modifies the orginal Settings class provided by the user",
   "type": "object",
   "properties": {
+    "update_sample_event_topic": {
+      "title": "Update Sample Event Topic",
+      "description": "Name of the event topic that tracks sample events",
+      "example": "sample_events",
+      "env_names": [
+        "cm_update_sample_event_topic"
+      ],
+      "type": "string"
+    },
+    "update_sample_event_type": {
+      "title": "Update Sample Event Type",
+      "description": "The type label for events containing update-op data for samples",
+      "example": "update_sample",
+      "env_names": [
+        "cm_update_sample_event_type"
+      ],
+      "type": "string"
+    },
     "sample_updated_event_topic": {
       "title": "Sample Updated Event Topic",
       "description": "Name of the event topic used to track sample update events",
@@ -207,6 +225,8 @@
     }
   },
   "required": [
+    "update_sample_event_topic",
+    "update_sample_event_type",
     "sample_updated_event_topic",
     "sample_updated_event_type",
     "service_instance_id",

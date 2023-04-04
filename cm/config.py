@@ -20,6 +20,7 @@ from ghga_service_chassis_lib.config import config_from_yaml
 from hexkit.providers.akafka import KafkaConfig
 from hexkit.providers.mongodb.provider import MongoDbConfig
 
+from cm.adapters.inbound.akafka import EventSubTranslatorConfig
 from cm.adapters.outbound.akafka import EventPubTranslatorConfig
 
 
@@ -35,6 +36,7 @@ class Config(  # pylint: disable=too-many-ancestors
     MongoDbConfig,
     KafkaConfig,
     EventPubTranslatorConfig,
+    EventSubTranslatorConfig,
 ):
     """Config parameters and their defaults."""
 

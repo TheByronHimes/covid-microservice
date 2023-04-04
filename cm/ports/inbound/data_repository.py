@@ -58,7 +58,11 @@ class DataRepositoryPort(ABC):
 
     @abstractmethod
     async def update_sample(
-        self, *, updates: models.SampleUpdate, access_token: str
+        self,
+        *,
+        updates: models.SampleUpdate,
+        access_token: str = "",
+        is_external: bool = True,
     ) -> None:
         """Takes the supplied SampleUpdate object, finds the matching sample,
         and applies the updates
